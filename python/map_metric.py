@@ -101,17 +101,24 @@ def _get_agg_layer(uri, agg_level=None, agg_period=None, timeperiod=None,
     return QgsVectorLayer(uri.uri(False), layername, 'postgres')
 
 def loadPrintComposerTemplate(template):
-    '''Load a print composer template from provided filename argument'''
-
+    '''Load a print composer template from provided filename argument
     
-    myComposition = QgsComposition(qgis.utils.iface.mapCanvas().mapRenderer())
+    Args:
+        template: readable .qpt template filename
+        
+    Returns:
+        myComposition: a QgsComposition loaded from the provided template
+        mapSettings: a QgsMapSettings object associated with myComposition'''
+
+    mapSettings = QgsMapSettings()
+    myComposition = QgsComposition(mapSettings)
     # Load template from filename
     with open(template, 'r') as templateFile:
         myTemplateContent = templateFile.read()
     
     myDocument = QDomDocument()
     myDocument.setContent(myTemplateContent)
-    myComposition.loadFromTemplate(myDocument)
+    return myComposition.loadFromTemplate(myDocument), mapSettings
 
 if __name__ == '__main__':
     #Configure logging
@@ -131,6 +138,9 @@ if __name__ == '__main__':
     except ValueError as err:
         LOGGER.critical(str(err))
         sys.exit(2)
+        
+        
+    
     #TODO load map template
     URI = _new_uri(dbset)
 #TODO stylepath
