@@ -43,7 +43,7 @@ import logging
 #qgis imports
 from qgis.core import *
 from qgis.util import iface
-from PyQt4.QtGui import QDomDocument
+from qgis.PyQt.QtXml import QDomDocument
 from parsing_utils import parse_args, _validate_multiple_yyyymm_range, _get_timerange
 SQLS = {'year':"""(
 SELECT row_number() OVER (PARTITION BY metrics.agg_period ORDER BY metrics.{metric} DESC) AS "Rank",
@@ -66,8 +66,19 @@ ORDER BY metrics.{metric} DESC LIMIT 50)"""#,
     #'month':''''''
 }
 
-METRICS = {'b':'bti',
-           't':'tti'}
+METRICS = {'b':{'sql_acronym':'bti',
+                'metric_name':'Least Reliable',
+                'stat_description':'Buffer Time Index = (95th percentile Time - Median Time)/(Median Time)'
+               },
+           't':{'sql_acronym':'tti',
+                'metric_name':'Most Congested',
+                'stat_description':'Travel Time Index = Average Travel Time / Free Flow Travel Time'
+               }
+          }
+
+COMPOSER_LABELS = {'map_title': '{agg_period} Top 50 {metric_name} Road Segments',
+                   'time_period': '{period_name} ({from_hour}-{to_hour})',
+                   'stat_description': '{stat_description}'}
 
 def _new_uri(dbset):
     '''Create a new URI based on the database settings and return it
@@ -104,7 +115,26 @@ def _get_agg_layer(uri, agg_level=None, agg_period=None, timeperiod=None,
     uri.setDataSource("", sql, "geom", "", "gid")
     return QgsVectorLayer(uri.uri(False), layername, 'postgres')
 
-def loadPrintComposerTemplate(template, console=True):
+def update_labels(composition, labels_dict = COMPOSER_LABELS, labels_update = None):
+    '''Change the labels in the QgsComposition using a dictionary of update values
+    
+    Iterates over the keys (label ids) and values (strings to update) of the labels_dict
+    Finds the corresponding element of the composition, and updates it based on keys and 
+    values provided in labels_update.
+    
+    Args:
+        composition: the QgsComposition
+        labels_dict: dictionary of labels to change of form 
+            {'label_id':'label_text to {update_section}'}
+        labels_update: dictionary of values to update labels with
+            format: {'update_section':'update_value'}
+    Returns:
+        None'''
+    for label_id, label_text in labels_dict.items():
+        composition.getComposerItemById(label_id).setText(label_text.format(**labels_update))
+    
+
+def load_print_composer(template, console=True):
     '''Load a print composer template from provided filename argument
     
     Args:
@@ -119,16 +149,21 @@ def loadPrintComposerTemplate(template, console=True):
     with open(template, 'r') as templateFile:
         myTemplateContent = templateFile.read()
         myDocument.setContent(myTemplateContent)
-    #mapSettings = QgsMapSettings()
+    composerView = None
     
     if console:
-        myComposition = iface.createNewComposer()
-        myComposition.composition().loadFromTemplate(myDocument)
+        composerView = iface.createNewComposer()
+        composerView.composition().loadFromTemplate(myDocument)
+        myComposition = composerView.composition()
+        mapSettings = myComposition.mapSettings()
     else:
         raise NotImplementedError('More work needs to be done for standalone')
+        mapSettings = QgsMapSettings()
         myComposition = QgsComposition(mapSettings)
         myComposition.loadFromTemplate(myDocument)
-    return myComposition
+    return {'QgsComposition':myComposition,
+            'QgsMapSettings':mapSettings,
+            'QgsComposerView': composerView
 
 if __name__ == '__main__':
     #Configure logging
@@ -155,6 +190,10 @@ if __name__ == '__main__':
     URI = _new_uri(dbset)
 #TODO stylepath
     stylepath = "K:\\Big Data Group\\Data\\GIS\\Congestion_Reporting\\top50style.qml"
+    template = 'K:\\Big Data Group\\Data\\GIS\\Congestion_Reporting\\top_50_template.qpt'
+    composerDict = loadPrintComposerTemplate(template, console=False)
+    composition = composerDict['QgsComposition']
+    ms = composerDict['QgsMapSettings']
 
     for m in ARGS.metric:
         metric = METRICS[m]
@@ -176,7 +215,9 @@ if __name__ == '__main__':
                                            layername=layername)
                     QgsMapLayerRegistry.instance().addMapLayer(layer)
                     layer.loadNamedStyle(stylepath)
-            #TODO Processing stuff
+                    update_values = {}
+                    update_labels(composition, labels_update = updateValues)
+            
 
 elif __name__ == 'console_testing':
     import ConfigParser
