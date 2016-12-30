@@ -40,6 +40,10 @@ optional arguments:
 #TODO import stuff
 import sys
 import logging
+#qgis imports
+from qgis.core import *
+from qgis.util import iface
+from PyQt4.QtGui import QDomDocument
 from parsing_utils import parse_args, _validate_multiple_yyyymm_range, _get_timerange
 SQLS = {'year':"""(
 SELECT row_number() OVER (PARTITION BY metrics.agg_period ORDER BY metrics.{metric} DESC) AS "Rank",
@@ -100,25 +104,31 @@ def _get_agg_layer(uri, agg_level=None, agg_period=None, timeperiod=None,
     uri.setDataSource("", sql, "geom", "", "gid")
     return QgsVectorLayer(uri.uri(False), layername, 'postgres')
 
-def loadPrintComposerTemplate(template):
+def loadPrintComposerTemplate(template, console=True):
     '''Load a print composer template from provided filename argument
     
     Args:
         template: readable .qpt template filename
+        console: boolean if method is used in QGIS console
         
     Returns:
-        myComposition: a QgsComposition loaded from the provided template
-        mapSettings: a QgsMapSettings object associated with myComposition'''
-
-    mapSettings = QgsMapSettings()
-    myComposition = QgsComposition(mapSettings)
+        myComposition: a QgsComposerView loaded from the provided template
+        --mapSettings: a QgsMapSettings object associated with myComposition'''
     # Load template from filename
+    myDocument = QDomDocument()
     with open(template, 'r') as templateFile:
         myTemplateContent = templateFile.read()
+        myDocument.setContent(myTemplateContent)
+    #mapSettings = QgsMapSettings()
     
-    myDocument = QDomDocument()
-    myDocument.setContent(myTemplateContent)
-    return myComposition.loadFromTemplate(myDocument), mapSettings
+    if console:
+        myComposition = iface.createNewComposer()
+        myComposition.composition().loadFromTemplate(myDocument)
+    else:
+        raise NotImplementedError('More work needs to be done for standalone')
+        myComposition = QgsComposition(mapSettings)
+        myComposition.loadFromTemplate(myDocument)
+    return myComposition
 
 if __name__ == '__main__':
     #Configure logging
