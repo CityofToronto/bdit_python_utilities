@@ -197,6 +197,17 @@ def load_print_composer(template, console=True):
             'QgsMapSettings':mapSettings,
             'QgsComposerView': composerView}
 
+def _get_to_hour(hour):
+    '''Convert hour to 12 hr clock and append AM/PM'''
+    to_hour ''
+    if hour = 12:
+        to_hour = str(hour) + ' PM'
+    elif hour > 12:
+        to_hour = str(hour - 12) + ' PM'
+    else:
+        to_hour = str(hour) + ' AM'
+    return to_hour
+
 if __name__ == '__main__':
     #Configure logging
     FORMAT = '%(asctime)-15s %(message)s'
@@ -247,10 +258,11 @@ if __name__ == '__main__':
                                            layername=layername)
                     QgsMapLayerRegistry.instance().addMapLayer(layer)
                     layer.loadNamedStyle(stylepath)
+                    
                     update_values = {'agg_period': _get_agg_period(ARGS.agg_level, year, month),
-                                     'period_name': '',
+                                     'period_name': ARGS.periodname,
                                      'from_hour':hour1,
-                                     'to_hour': hour2, #TODO Add AM/PM logic
+                                     'to_hour': _get_to_hour(hour2), 
                                      'stat_description': metric['stat_description'],
                                      'metric_name': metric['metric_name']
                                     }

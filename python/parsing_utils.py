@@ -50,6 +50,9 @@ def parse_args(args, prog = None, usage = None):
     TIMEPERIOD.add_argument("-i","--hours_iterate", nargs=2, type=int,
                             help="Hours to iterate over")
 
+    PARSER.add_argument("--periodname", nargs=2,
+                        help="Custom name for --timeperiod e.g. 'AM Peak'")
+    
     PARSER.add_argument("-d", "--dbsetting",
                         default='default.cfg',
                         help="Filename with connection settings to the database"
@@ -59,10 +62,14 @@ def parse_args(args, prog = None, usage = None):
                         help="Table containing metrics %(default)s")
     parsed_args = PARSER.parse_args(args)
 
+    if parsed_args.periodname:
+        parsed_args.periodname = ' '.join(parsed_args.periodname) + ' '
     if parsed_args.timeperiod and len(parsed_args.timeperiod) > 2:
         PARSER.error('--timeperiod takes one or two arguments')
     if len(parsed_args.Metric) > 2:
         PARSER.error('Extra input of metrics unsupported')
+    if parsed_args.periodname and parsed_args.hours_iterate:
+        PARSER.error('--periodname should only be used with --timeperiod')
     return parsed_args
 
 def get_yyyymmdd(yyyy, mm, **kwargs):

@@ -186,6 +186,13 @@ class ArgParseTestCase(unittest.TestCase):
         self.assertEqual(2, cm.exception.code)
         self.assertEqual('usage: \nTESTING: error: argument -r/--range: expected 2 arguments\n', stderr.getvalue())
 
+    def test_custom_period_name_exception(self):
+        '''Test if combining custom time period name with -i produces the right exception'''
+        with self.assertRaises(SystemExit) as cm, capture_sys_output() as (stdout, stderr):
+            args = parse_args('b year -i 8 10 --periodname AM Peak -r 201207 201506'.split(), **self.testing_params)
+        self.assertEqual(2, cm.exception.code)
+        self.assertEqual('usage: \nTESTING: error: --periodname should only be used with --timeperiod\n', stderr.getvalue())
+
     def test_timeperiod_too_many_args_exception(self):
         '''Test if a single year produces the right exception'''
         with self.assertRaises(SystemExit) as cm, capture_sys_output() as (stdout, stderr):
@@ -198,6 +205,12 @@ class ArgParseTestCase(unittest.TestCase):
         valid_result = [8]
         args = parse_args('b t year -p 8 -r 201407 201506'.split())
         self.assertEqual(valid_result, args.timeperiod)
+
+    def test_periodname(self):
+        '''Test if the right value for a custom timeperiod name is parsed'''
+        valid_result = 'AM Peak '
+        args = parse_args("b t year -p 8 --periodname AM Peak -r 201407 201506".split())
+        self.assertEqual(valid_result, args.periodname)
 
     def test_iterate_hours(self):
         '''Test if the right value for iteration hours is parsed'''
