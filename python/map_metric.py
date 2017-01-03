@@ -40,6 +40,7 @@ optional arguments:
 #TODO import stuff
 import sys
 import logging
+import calendar
 #qgis imports
 from qgis.core import *
 from qgis.util import iface
@@ -115,6 +116,37 @@ def _get_agg_layer(uri, agg_level=None, agg_period=None, timeperiod=None,
     uri.setDataSource("", sql, "geom", "", "gid")
     return QgsVectorLayer(uri.uri(False), layername, 'postgres')
 
+def _get_agg_period(agg_level, year, month):
+    '''Create a text representation of the aggregation period
+    
+    Takes the aggregation level, the aggregation period's year and month, then
+    returns a text representation of the aggregation period.
+    
+    Args:
+        agg_level (str): aggregation Level
+        year (int): the aggregation period's year
+        month (int): the aggregation period's month
+    Returns:
+        a text representation of the aggregation period based on the 
+        aggregation level and the provided year and month
+    Raises:
+        NotImplementedError: if the agg_level is not hardcoded in the function 
+            logic {'year','quarter','month'}
+    '''
+    agg_period = ''
+    if agg_level == 'year':
+        agg_period = str(year)
+    elif agg_level == 'quarter':
+        q = int(month/3) + 1
+        agg_period = str(year) + ' Q' + str(q)
+    elif agg_level == 'month':
+        month_text = calendar.month_name[month]
+        agg_period = month_text + ' ' + str(year)
+    else:
+        raise NotImplementedError('No support for {agg_level}'.format({'agg_level':agg_level}))
+    return agg_period
+
+
 def update_labels(composition, labels_dict = COMPOSER_LABELS, labels_update = None):
     '''Change the labels in the QgsComposition using a dictionary of update values
     
@@ -163,7 +195,7 @@ def load_print_composer(template, console=True):
         myComposition.loadFromTemplate(myDocument)
     return {'QgsComposition':myComposition,
             'QgsMapSettings':mapSettings,
-            'QgsComposerView': composerView
+            'QgsComposerView': composerView}
 
 if __name__ == '__main__':
     #Configure logging
@@ -215,7 +247,13 @@ if __name__ == '__main__':
                                            layername=layername)
                     QgsMapLayerRegistry.instance().addMapLayer(layer)
                     layer.loadNamedStyle(stylepath)
-                    update_values = {}
+                    update_values = {'agg_period': _get_agg_period(ARGS.agg_level, year, month),
+                                     'period_name': '',
+                                     'from_hour':hour1,
+                                     'to_hour': hour2, #TODO Add AM/PM logic
+                                     'stat_description': metric['stat_description'],
+                                     'metric_name': metric['metric_name']
+                                    }
                     update_labels(composition, labels_update = updateValues)
             
 

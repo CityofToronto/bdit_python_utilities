@@ -1,5 +1,6 @@
 import unittest
 import sys
+from map_metric import _get_timerange, _get_agg_period
 ''' Testing file
     Run with `python -m unittest in the root folder'''
 
@@ -24,7 +25,31 @@ class TimeRangeTestCase(unittest.TestCase):
             _get_timerange(8,8)
         self.assertEqual('2nd time parameter 8 must be at least 1 hour after first parameter 8', str(cm.exception))
 
+class AggPeriodTestCase(unittest.TestCase):
+    '''Tests for _get_agg_period'''
+    
+    def test_year(self):
+        '''Test if right string is produced for year aggregation 2015'''
+        year = 2015
+        month = 1
+        valid_result = '2015'
+        self.assertEqual(valid_result, _get_agg_period('year', year, month))
 
+    def test_quarter(self):
+        '''Test if right string produced for quarter aggregation 2015 Q2'''
+        year = 2015
+        month = 4
+        valid_result = '2015 Q2'
+        self.assertEqual(valid_result, _get_agg_period('quarter', year, month))
+
+    def test_month(self):
+        '''Test if right string produced for month aggregation 2015-04'''
+        year = 2015
+        month = 4
+        valid_result = 'April 2015'
+        self.assertEqual(valid_result, _get_agg_period('month', year, month))
+
+    
 
 if __name__ == '__main__':
     unittest.main()
