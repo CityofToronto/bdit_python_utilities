@@ -78,7 +78,7 @@ METRICS = {'b':{'sql_acronym':'bti',
           }
 
 COMPOSER_LABELS = {'map_title': '{agg_period} Top 50 {metric_name} Road Segments',
-                   'time_period': '{period_name} ({from_hour}-{to_hour})',
+                   'time_period': '{period_name} ({from_to_hours})',
                    'stat_description': '{stat_description}'}
 
 def _new_uri(dbset):
@@ -193,20 +193,9 @@ def load_print_composer(template, console=True):
         mapSettings = QgsMapSettings()
         myComposition = QgsComposition(mapSettings)
         myComposition.loadFromTemplate(myDocument)
-    return {'QgsComposition':myComposition,
-            'QgsMapSettings':mapSettings,
+    return {'QgsComposition': myComposition,
+            'QgsMapSettings': mapSettings,
             'QgsComposerView': composerView}
-
-def _get_to_hour(hour):
-    '''Convert hour to 12 hr clock and append AM/PM'''
-    to_hour ''
-    if hour = 12:
-        to_hour = str(hour) + ' PM'
-    elif hour > 12:
-        to_hour = str(hour - 12) + ' PM'
-    else:
-        to_hour = str(hour) + ' AM'
-    return to_hour
 
 if __name__ == '__main__':
     #Configure logging
@@ -231,7 +220,7 @@ if __name__ == '__main__':
     
     #TODO load map template
     URI = _new_uri(dbset)
-#TODO stylepath
+    #TODO stylepath
     stylepath = "K:\\Big Data Group\\Data\\GIS\\Congestion_Reporting\\top50style.qml"
     template = 'K:\\Big Data Group\\Data\\GIS\\Congestion_Reporting\\top_50_template.qpt'
     composerDict = loadPrintComposerTemplate(template, console=False)
@@ -261,12 +250,11 @@ if __name__ == '__main__':
                     
                     update_values = {'agg_period': _get_agg_period(ARGS.agg_level, year, month),
                                      'period_name': ARGS.periodname,
-                                     'from_hour':hour1,
-                                     'to_hour': _get_to_hour(hour2), 
+                                     'from_to_hours': format_fromto_hr(hour1, hour2), 
                                      'stat_description': metric['stat_description'],
                                      'metric_name': metric['metric_name']
                                     }
-                    update_labels(composition, labels_update = updateValues)
+                    update_labels(composition, labels_update = update_values)
             
 
 elif __name__ == 'console_testing':

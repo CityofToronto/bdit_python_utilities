@@ -3,11 +3,9 @@ import sys
 from argparse import ArgumentError
 from contextlib import contextmanager
 from io import StringIO
-from parsing_utils import _get_timerange, parse_args, _validate_multiple_yyyymm_range, _validate_yyyymm_range
+from parsing_utils import _get_timerange, parse_args, _validate_multiple_yyyymm_range, _validate_yyyymm_range, format_fromto_hr
 ''' Testing file
     Run with `python -m unittest in the root folder'''
-
-
 
 @contextmanager
 def capture_sys_output():
@@ -224,5 +222,33 @@ class ArgParseTestCase(unittest.TestCase):
         args = parse_args('b t year -i 8 9 -r 201407 201506'.split())
         self.assertEqual(valid_result, args.tablename)
 
+    def test_hours_check(self):
+        '''Test if a too many metrics throws an error'''
+        with self.assertRaises(SystemExit) as cm, capture_sys_output() as (stdout, stderr):
+            args = parse_args('b year -p 8 25 -r 201407 201506'.split(), **self.testing_params)
+        self.assertEqual(2, cm.exception.code)
+        errmsg = '25 must be between 0 and 24'
+        self.assertEqual(self.stderr_msg.format(errmsg=errmsg), stderr.getvalue())
+        with self.assertRaises(SystemExit) as cm, capture_sys_output() as (stdout, stderr):
+            args = parse_args('b year -p 24 8 -r 201407 201506'.split(), **self.testing_params)
+        self.assertEqual(2, cm.exception.code)
+        errmsg = '24 must be before 8'
+        self.assertEqual(self.stderr_msg.format(errmsg=errmsg), stderr.getvalue())
+        
+class FromToHourTestCase(unittest.TestCase):
+    '''Tests for getting strings for the to_hour'''
+        
+    def test_valid(self):
+        '''Test if the right string is produced from hour<12, hour=12, hour>12, hour=24'''
+        valid_result = '8-10 AM'
+        self.assertEqual(valid_result, format_fromto_hr(8, 10))
+        valid_result = '8 AM-12 PM'
+        self.assertEqual(valid_result, format_fromto_hr(8, 12))
+        valid_result = '4-6 PM'
+        self.assertEqual(valid_result, format_fromto_hr(16, 18))
+        valid_result = '5 AM-12 AM'
+        self.assertEqual(valid_result, format_fromto_hr(5, 24))
+
+        
 if __name__ == '__main__':
     unittest.main()

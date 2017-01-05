@@ -16,6 +16,19 @@ import logging
 import re
 from datetime import time
 
+def _check_hour(parser, hour):
+    if hour < 0 or hour > 24:
+        raise parser.error('{} must be between 0 and 24'.format(hour))
+
+def _check_hours(parser, hours):
+    if len(hours) > 1:
+        for hour in hours:
+            _check_hour(parser, hour)
+        if hours[0] > hours[1]:
+            raise parser.error('{} must be before {}'.format(hours[0],hours[1]))
+    else:
+        _check_hour(parser, hours if type(hours) is int else hours[0])
+
 def parse_args(args, prog = None, usage = None):
     '''Parse command line arguments
     
@@ -48,7 +61,7 @@ def parse_args(args, prog = None, usage = None):
     TIMEPERIOD.add_argument("-p", "--timeperiod", nargs='+', type=int,
                             help="Timeperiod of aggregation, use 1 arg for 1 hour or 2 args for a range")
     TIMEPERIOD.add_argument("-i","--hours_iterate", nargs=2, type=int,
-                            help="Hours to iterate over")
+                            help="Create hourly maps from H1 to H2 with H from 0-24")
 
     PARSER.add_argument("--periodname", nargs=2,
                         help="Custom name for --timeperiod e.g. 'AM Peak'")
@@ -70,6 +83,7 @@ def parse_args(args, prog = None, usage = None):
         PARSER.error('Extra input of metrics unsupported')
     if parsed_args.periodname and parsed_args.hours_iterate:
         PARSER.error('--periodname should only be used with --timeperiod')
+    _check_hours(PARSER, parsed_args.timeperiod if parsed_args.timeperiod else parsed_args.hours_iterate)
     return parsed_args
 
 def get_yyyymmdd(yyyy, mm, **kwargs):
@@ -86,6 +100,27 @@ def get_yyyymmdd(yyyy, mm, **kwargs):
         return str(yyyy)+'-0'+str(mm)+'-'+dd
     else:
         return str(yyyy)+'-'+str(mm)+'-'+dd
+
+def _format_hour_ampm(hr):
+    '''Return a string hour with no leading zero and AM/PM'''
+    return '{:d} {}'.format(int(hr.strftime("%I")), hr.strftime("%p"))
+
+def format_fromto_hr(hour1, hour2):
+    '''Format hour1-hour2 as a string and append AM/PM'''
+    from_to_hour = '{from_hour}-{to_hour}'
+    hr1 = time(hour1)
+    to_hour = None
+    
+    if hour2 == 24:
+        to_hour = '12 AM'
+        from_hour =  _format_hour_ampm(hr1)
+    else:
+        to_hour = _format_hour_ampm(time(hour2))
+        if hour1 < 12 and hour2 >= 12:
+            from_hour =  _format_hour_ampm(hr1)
+        else:
+            from_hour = str(int(hr1.strftime("%I")))
+    return from_to_hour.format(from_hour=from_hour, to_hour=to_hour)
 
 def _validate_yyyymm_range(yyyymmrange, agg_level):
     '''Validate the two yyyymm command line arguments provided
