@@ -86,7 +86,7 @@ def _new_uri(dbset):
 
     Args:
         dbset: dictionary of database connection settings
-
+    
     Returns:
         PyQGIS uri object'''
     uri = QgsDataSourceURI()
@@ -110,7 +110,7 @@ def _get_agg_layer(uri, agg_level=None, agg_period=None, timeperiod=None,
     if agg_level not in SQLS:
         raise ValueError('Aggregation level: {agg_level} not implemented'.format(
             agg_level=agg_level))
-
+    
     sql = SQLS[agg_level]
     sql = sql.format(timeperiod=timeperiod, agg_period=agg_period, metric=metric)
     uri.setDataSource("", sql, "geom", "", "gid")
@@ -121,7 +121,7 @@ def _get_agg_period(agg_level, year, month):
     
     Takes the aggregation level, the aggregation period's year and month, then
     returns a text representation of the aggregation period.
-    
+     
     Args:
         agg_level (str): aggregation Level
         year (int): the aggregation period's year
@@ -202,9 +202,9 @@ if __name__ == '__main__':
     FORMAT = '%(asctime)-15s %(message)s'
     logging.basicConfig(level=logging.INFO, format=FORMAT)
     LOGGER = logging.getLogger(__name__)
-
+    
     ARGS = parse_args(sys.argv[1:])
-
+    
     import configparser
     CONFIG = configparser.ConfigParser()
     CONFIG.read(ARGS.dbsetting)
@@ -226,7 +226,7 @@ if __name__ == '__main__':
     composerDict = loadPrintComposerTemplate(template, console=False)
     composition = composerDict['QgsComposition']
     ms = composerDict['QgsMapSettings']
-
+    
     for m in ARGS.metric:
         metric = METRICS[m]
         for year in YEARS:
@@ -277,7 +277,7 @@ elif __name__ == 'console_testing':
                            metric=metric,
                            layername=layername)
     QgsMapLayerRegistry.instance().addMapLayer(layer)
-
+    
     template = "K:\\Big Data Group\\Data\\GIS\\Congestion_Reporting\\top_50_template.qpt"
     
     loadPrintComposerTemplate(template)

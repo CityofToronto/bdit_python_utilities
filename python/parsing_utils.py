@@ -43,26 +43,26 @@ def parse_args(args, prog = None, usage = None):
     PARSER = argparse.ArgumentParser(description='Produce maps of congestion metrics (tti, bti) for '
                                                  'different aggregation periods, timeperiods, and '
                                                  'aggregation levels', prog=prog, usage=usage)
-
+    
     PARSER.add_argument('Metric', choices=['b', 't'], nargs='+',
                         help="Map either Buffer Time Index, Travel"
                         "Time Index or both e.g. b, t, or 'b t'."
                         "Make sure to space arguments")
-
+    
     PARSER.add_argument("Aggregation", choices=['year', 'quarter', 'month'],
                         help="Aggregation level to be used")
-
+    
     PARSER.add_argument("-r", "--range", nargs=2, action='append',
                         help="Range of months (YYYYMM) to operate over"
                         "from startdate to enddate. Accepts multiple pairs",
                         metavar=('YYYYMM', 'YYYYMM'), required=True)
-
+    
     TIMEPERIOD = PARSER.add_mutually_exclusive_group(required=True)
     TIMEPERIOD.add_argument("-p", "--timeperiod", nargs='+', type=int,
                             help="Timeperiod of aggregation, use 1 arg for 1 hour or 2 args for a range")
     TIMEPERIOD.add_argument("-i","--hours_iterate", nargs=2, type=int,
                             help="Create hourly maps from H1 to H2 with H from 0-24")
-
+    
     PARSER.add_argument("--periodname", nargs=2,
                         help="Custom name for --timeperiod e.g. 'AM Peak'")
     
@@ -74,7 +74,7 @@ def parse_args(args, prog = None, usage = None):
                         default='congestion.metrics',
                         help="Table containing metrics %(default)s")
     parsed_args = PARSER.parse_args(args)
-
+    
     if parsed_args.periodname:
         parsed_args.periodname = ' '.join(parsed_args.periodname) + ' '
     if parsed_args.timeperiod and len(parsed_args.timeperiod) > 2:
@@ -95,7 +95,7 @@ def get_yyyymmdd(yyyy, mm, **kwargs):
         dd = str(kwargs['dd'])
     elif kwargs['dd'] < 10:
         dd = '0'+str(kwargs['dd'])
-
+    
     if mm < 10:
         return str(yyyy)+'-0'+str(mm)+'-'+dd
     else:
@@ -129,10 +129,10 @@ def _validate_yyyymm_range(yyyymmrange, agg_level):
         yyyymmrange: List containing a start and end year-month in yyyymm format
         agg_level: the aggregation level, determines number of months each 
             period spans
-
+    
     Returns:
         A dictionary with the processed range like {'yyyy':range(mm1,mm2+1)}
-
+    
     Raises:
         ValueError: If the values entered are incorrect
     '''
@@ -143,15 +143,15 @@ def _validate_yyyymm_range(yyyymmrange, agg_level):
         step = 1
     elif agg_level == 'quarter':
         step = 3
-
+    
     if len(yyyymmrange) != 2:
         raise ValueError('{yyyymmrange} should contain two YYYYMM arguments'
                          .format(yyyymmrange=yyyymmrange))
-
+    
     regex_yyyymm = re.compile(r'20\d\d(0[1-9]|1[0-2])')
     yyyy, mm = [], []
     years = {}
-
+    
     for yyyymm in yyyymmrange:
         if regex_yyyymm.fullmatch(yyyymm):
             if agg_level == 'year' and int(yyyymm[-2:]) != 1:
@@ -165,11 +165,11 @@ def _validate_yyyymm_range(yyyymmrange, agg_level):
         else:
             raise ValueError('{yyyymm} is not a valid year-month value of format YYYYMM'
                              .format(yyyymm=yyyymm))
-
+     
     if yyyy[0] > yyyy[1] or (yyyy[0] == yyyy[1] and mm[0] > mm[1]):
         raise ValueError('Start date {yyyymm1} after end date {yyyymm2}'
                          .format(yyyymm1=yyyymmrange[0], yyyymm2=yyyymmrange[1]))
-    
+     
     if agg_level == 'year':
         #Only add January for each year to be mapped
         if yyyy[0] == yyyy[1]:
@@ -190,7 +190,7 @@ def _validate_yyyymm_range(yyyymmrange, agg_level):
                     years[year] = range(1, mm[1]+1, step)
                 else:
                     years[year] = range(1, 13, step)
-
+    
     return years
 
 def _validate_multiple_yyyymm_range(years_list, agg_level):
@@ -251,4 +251,3 @@ def _get_timerange(time1, time2):
     
     return 'timerange(\'{starttime}\'::time, \'{endtime}\'::time)'.format(starttime=starttime.isoformat(),
                                                                           endtime=endtime.isoformat())
-
