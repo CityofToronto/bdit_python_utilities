@@ -46,6 +46,7 @@ from qgis.core import *
 from qgis.util import iface
 from qgis.PyQt.QtXml import QDomDocument
 from parsing_utils import parse_args, _validate_multiple_yyyymm_range, _get_timerange
+from qgis.gui import QgsMapCanvasLayer
 SQLS = {'year':"""(
 SELECT row_number() OVER (PARTITION BY metrics.agg_period ORDER BY metrics.{metric} DESC) AS "Rank",
     tmc_from_to_lookup.street_name AS "Street",
@@ -80,6 +81,7 @@ METRICS = {'b':{'sql_acronym':'bti',
 COMPOSER_LABELS = {'map_title': '{agg_period} Top 50 {metric_name} Road Segments',
                    'time_period': '{period_name} ({from_to_hours})',
                    'stat_description': '{stat_description}'}
+BACKGROUND_LAYERNAMES = [u'CENTRELINE_WGS84', u'to']
 
 def _new_uri(dbset):
     '''Create a new URI based on the database settings and return it
@@ -190,12 +192,25 @@ def load_print_composer(template, console=True):
         mapSettings = myComposition.mapSettings()
     else:
         raise NotImplementedError('More work needs to be done for standalone')
+        canvas = QgsMapCanvas()
+        # Load our project
+        QgsProject.instance().read(QFileInfo(project_path))
+        bridge = QgsLayerTreeMapCanvasBridge(
+            QgsProject.instance().layerTreeRoot(), canvas)
+        bridge.setCanvasLayers()
         mapSettings = QgsMapSettings()
         myComposition = QgsComposition(mapSettings)
         myComposition.loadFromTemplate(myDocument)
     return {'QgsComposition': myComposition,
             'QgsMapSettings': mapSettings,
             'QgsComposerView': composerView}
+
+def get_background_layers(mapregistry, layernamelist):
+    '''Return background layers'''
+    
+    layers = [map_registry.mapLayersByName(name)[0] for name in layernamelist]
+    layerslist = [QgsMapCanvasLayer(layer) for layer in layers]
+    return layerslist
 
 if __name__ == '__main__':
     #Configure logging
@@ -226,6 +241,8 @@ if __name__ == '__main__':
     composerDict = loadPrintComposerTemplate(template, console=False)
     composition = composerDict['QgsComposition']
     ms = composerDict['QgsMapSettings']
+    map_registry = QgsMapLayerRegistry.instance()
+    background_layers = get_background_layers(map_registry, BACKGROUND_LAYERNAMES)
     
     for m in ARGS.metric:
         metric = METRICS[m]
@@ -245,7 +262,7 @@ if __name__ == '__main__':
                                            timeperiod=timerange,
                                            metric=metric,
                                            layername=layername)
-                    QgsMapLayerRegistry.instance().addMapLayer(layer)
+                    map_registry.addMapLayer(layer)
                     layer.loadNamedStyle(stylepath)
                     
                     update_values = {'agg_period': _get_agg_period(ARGS.agg_level, year, month),
@@ -255,21 +272,38 @@ if __name__ == '__main__':
                                      'metric_name': metric['metric_name']
                                     }
                     update_labels(composition, labels_update = update_values)
+                    #TODO make sure only background_layers + new layer are loaded
             
 
 elif __name__ == 'console_testing':
     import ConfigParser
     import StringIO
     from datetime import time
+    from qgis.utils import iface
+    
     buf = StringIO.StringIO(s_config)
     config = ConfigParser.ConfigParser()
     config.readfp(buf)
     dbset = config._sections['DBSETTINGS']
     URI = _new_uri(dbset)
+    
+
+    template = "K:\\Big Data Group\\Data\\GIS\\Congestion_Reporting\\top_50_template.qpt"
+
+    printcomposer = load_print_composer(template)
+
+    background_layers = get_background_layers(map_registry, BACKGROUND_LAYERNAMES)
+    
+    
     agg_level = 'year'
-    metric = 'bti'
+    metric = METRICS['t']
     yyyymmdd = "'2015-01-01'"
-    timerange = _get_timerange(17, 18)
+    year = '2015'
+    month = '01'
+    hour1 = 8
+    hour2 = 9
+    periodname = ''
+    timerange = _get_timerange(hour1, hour2)
     layername = '2015_pm_reliable'
     layer = _get_agg_layer(URI, agg_level=agg_level,
                            agg_period=yyyymmdd,
@@ -278,6 +312,15 @@ elif __name__ == 'console_testing':
                            layername=layername)
     QgsMapLayerRegistry.instance().addMapLayer(layer)
     
-    template = "K:\\Big Data Group\\Data\\GIS\\Congestion_Reporting\\top_50_template.qpt"
+    layerslist = background_layers + [QgsMapCanvasLayer(layer)]
+    iface.mapCanvas().setLayerSet(layerslist)
     
-    loadPrintComposerTemplate(template)
+    update_values = {'agg_period': _get_agg_period(agg_level, year, month),
+                     'period_name': periodname,
+                     'from_to_hours': format_fromto_hr(hour1, hour2), 
+                     'stat_description': metric['stat_description'],
+                     'metric_name': metric['metric_name']
+                    }
+    update_labels(printcomposer['QgsComposition'], labels_update = update_values)
+    
+    printcomposer['QgsComposition'].refreshItems()
