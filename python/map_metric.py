@@ -42,11 +42,16 @@ import sys
 import logging
 import calendar
 #qgis imports
-from qgis.core import *
-from qgis.util import iface
+
 from qgis.PyQt.QtXml import QDomDocument
-from parsing_utils import parse_args, _validate_multiple_yyyymm_range, _get_timerange
 from qgis.gui import QgsMapCanvasLayer
+QGIS_CONSOLE = True #For testing in console
+if QGIS_CONSOLE:
+    from qgis.utils import iface
+else:
+    from qgis.core import *
+    from parsing_utils import parse_args, _validate_multiple_yyyymm_range, _get_timerange, format_fromto_hr
+
 SQLS = {'year':"""(
 SELECT row_number() OVER (PARTITION BY metrics.agg_period ORDER BY metrics.{metric} DESC) AS "Rank",
     tmc_from_to_lookup.street_name AS "Street",
@@ -260,7 +265,7 @@ if __name__ == '__main__':
                     layer = _get_agg_layer(URI, agg_level=ARGS.agg_level,
                                            agg_period=yyyymmdd,
                                            timeperiod=timerange,
-                                           metric=metric,
+                                           metric=metric['sql_acronym'],
                                            layername=layername)
                     map_registry.addMapLayer(layer)
                     layer.loadNamedStyle(stylepath)
@@ -275,11 +280,10 @@ if __name__ == '__main__':
                     #TODO make sure only background_layers + new layer are loaded
             
 
-elif __name__ == 'console_testing':
+elif QGIS_CONSOLE:
     import ConfigParser
     import StringIO
     from datetime import time
-    from qgis.utils import iface
     
     buf = StringIO.StringIO(s_config)
     config = ConfigParser.ConfigParser()
@@ -287,32 +291,38 @@ elif __name__ == 'console_testing':
     dbset = config._sections['DBSETTINGS']
     URI = _new_uri(dbset)
     
-
+    map_registry = QgsMapLayerRegistry.instance()
     template = "K:\\Big Data Group\\Data\\GIS\\Congestion_Reporting\\top_50_template.qpt"
-
+    stylepath = "K:\\Big Data Group\\Data\\GIS\\Congestion_Reporting\\top50style.qml"
+    
     printcomposer = load_print_composer(template)
 
     background_layers = get_background_layers(map_registry, BACKGROUND_LAYERNAMES)
     
-    
+    # Setting up variables for iteration
     agg_level = 'year'
-    metric = METRICS['t']
+    metric = METRICS['b']
     yyyymmdd = "'2015-01-01'"
     year = '2015'
     month = '01'
-    hour1 = 8
-    hour2 = 9
+    hour1 = 17
+    hour2 = 18
     periodname = ''
     timerange = _get_timerange(hour1, hour2)
     layername = '2015_pm_reliable'
+    
+    # Begin iteration section
     layer = _get_agg_layer(URI, agg_level=agg_level,
                            agg_period=yyyymmdd,
                            timeperiod=timerange,
-                           metric=metric,
+                           metric=metric['sql_acronym'],
                            layername=layername)
-    QgsMapLayerRegistry.instance().addMapLayer(layer)
     
-    layerslist = background_layers + [QgsMapCanvasLayer(layer)]
+    
+    map_registry.addMapLayer(layer)
+    layer.loadNamedStyle(stylepath)
+    
+    layerslist = [QgsMapCanvasLayer(layer)] + background_layers
     iface.mapCanvas().setLayerSet(layerslist)
     
     update_values = {'agg_period': _get_agg_period(agg_level, year, month),

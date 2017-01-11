@@ -13,6 +13,10 @@ SET check_function_bodies = false;
 SET client_min_messages = warning;
 SET row_security = off;
 
+CREATE TYPE public.timerange AS RANGE(
+	subtype = TIME
+);
+
 --
 -- Name: congestion; Type: SCHEMA; Schema: -; Owner: -
 --
@@ -32,7 +36,6 @@ CREATE TABLE aggregation_levels (
     agg_id smallint NOT NULL,
     agg_level character varying(9) NOT NULL
 );
-
 
 --
 -- Name: aggregation_levels_agg_id_seq; Type: SEQUENCE; Schema: congestion; Owner: -
@@ -59,7 +62,7 @@ ALTER SEQUENCE aggregation_levels_agg_id_seq OWNED BY aggregation_levels.agg_id;
 
 CREATE TABLE metrics (
     tmc character(9),
-    timeperiod rdumas.timerange,
+    timeperiod timerange,
     agg_id smallint,
     agg_period date,
     tti real,
