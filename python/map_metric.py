@@ -57,9 +57,7 @@ SELECT row_number() OVER (PARTITION BY metrics.agg_period ORDER BY metrics.{metr
     tmc_from_to_lookup.street_name AS "Street",
     inrix_tmc_tor.direction AS "Dir",
     tmc_from_to_lookup.from_to AS "From - To",
-    to_char(metrics.bti, '9D99'::text) AS "Buffer Time Index",
-    to_char(metrics.tti, '9D99'::text) AS "Travel Time Index",
-    metrics.agg_period AS "Year",
+    to_char(metrics.{metric}, '9D99'::text) AS "{metric_name}",
     inrix_tmc_tor.geom,
     inrix_tmc_tor.gid
 FROM congestion.metrics
@@ -74,16 +72,18 @@ ORDER BY metrics.{metric} DESC LIMIT 50)"""#,
 }
 
 METRICS = {'b':{'sql_acronym':'bti',
-                'metric_name':'Least Reliable',
+                'metric_name':'Buffer Time Index',
+                'metric_attr':'Least Reliable',
                 'stat_description':'Buffer Time Index = (95th percentile Time - Median Time)/(Median Time)'
                },
            't':{'sql_acronym':'tti',
-                'metric_name':'Most Congested',
+                'metric_name': 'Travel Time Index',
+                'metric_attr':'Most Congested',
                 'stat_description':'Travel Time Index = Average Travel Time / Free Flow Travel Time'
                }
           }
 
-COMPOSER_LABELS = {'map_title': '{agg_period} Top 50 {metric_name} Road Segments',
+COMPOSER_LABELS = {'map_title': '{agg_period} Top 50 {metric_attr} Road Segments',
                    'time_period': '{period_name} ({from_to_hours})',
                    'stat_description': '{stat_description}'}
 BACKGROUND_LAYERNAMES = [u'CENTRELINE_WGS84', u'to']
@@ -101,7 +101,7 @@ def _new_uri(dbset):
     return uri
 
 def _get_agg_layer(uri, agg_level=None, agg_period=None, timeperiod=None,
-                   layername=None, metric=None):
+                   layername=None, metric=None, metric_name= None):
     '''Create a QgsVectorLayer from a connection and specified parameters
 
     Args:
@@ -119,7 +119,7 @@ def _get_agg_layer(uri, agg_level=None, agg_period=None, timeperiod=None,
             agg_level=agg_level))
     
     sql = SQLS[agg_level]
-    sql = sql.format(timeperiod=timeperiod, agg_period=agg_period, metric=metric)
+    sql = sql.format(timeperiod=timeperiod, agg_period=agg_period, metric=metric, metric_name=metric_name)
     uri.setDataSource("", sql, "geom", "", "gid")
     return QgsVectorLayer(uri.uri(False), layername, 'postgres')
 
@@ -266,7 +266,8 @@ if __name__ == '__main__':
                                            agg_period=yyyymmdd,
                                            timeperiod=timerange,
                                            metric=metric['sql_acronym'],
-                                           layername=layername)
+                                           layername=layername,
+                                           metric_name=metric['metric_name'])
                     map_registry.addMapLayer(layer)
                     layer.loadNamedStyle(stylepath)
                     
@@ -274,7 +275,7 @@ if __name__ == '__main__':
                                      'period_name': ARGS.periodname,
                                      'from_to_hours': format_fromto_hr(hour1, hour2), 
                                      'stat_description': metric['stat_description'],
-                                     'metric_name': metric['metric_name']
+                                     'metric_attr': metric['metric_attr']
                                     }
                     update_labels(composition, labels_update = update_values)
                     #TODO make sure only background_layers + new layer are loaded
@@ -316,7 +317,8 @@ elif QGIS_CONSOLE:
                            agg_period=yyyymmdd,
                            timeperiod=timerange,
                            metric=metric['sql_acronym'],
-                           layername=layername)
+                           layername=layername,
+                           metric_name=metric['metric_name'])
     
     
     map_registry.addMapLayer(layer)
@@ -329,8 +331,9 @@ elif QGIS_CONSOLE:
                      'period_name': periodname,
                      'from_to_hours': format_fromto_hr(hour1, hour2), 
                      'stat_description': metric['stat_description'],
-                     'metric_name': metric['metric_name']
+                     'metric_attr': metric['metric_attr']
                     }
     update_labels(printcomposer['QgsComposition'], labels_update = update_values)
-    
+    table = printcomposer['QgsComposition'].getComposerItemById('table').multiFrame()
+    table.setVectorLayer(layer)
     printcomposer['QgsComposition'].refreshItems()
