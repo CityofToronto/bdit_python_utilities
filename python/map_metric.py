@@ -58,8 +58,7 @@ SELECT row_number() OVER (PARTITION BY metrics.agg_period ORDER BY metrics.{metr
     inrix_tmc_tor.direction AS "Dir",
     tmc_from_to_lookup.from_to AS "From - To",
     to_char(metrics.{metric}, '9D99'::text) AS "{metric_name}",
-    inrix_tmc_tor.geom,
-    inrix_tmc_tor.gid
+    inrix_tmc_tor.geom
 FROM congestion.metrics
 JOIN congestion.aggregation_levels USING (agg_id)
 JOIN gis.inrix_tmc_tor USING (tmc)
@@ -120,7 +119,7 @@ def _get_agg_layer(uri, agg_level=None, agg_period=None, timeperiod=None,
     
     sql = SQLS[agg_level]
     sql = sql.format(timeperiod=timeperiod, agg_period=agg_period, metric=metric, metric_name=metric_name)
-    uri.setDataSource("", sql, "geom", "", "gid")
+    uri.setDataSource("", sql, "geom", "", "Rank")
     return QgsVectorLayer(uri.uri(False), layername, 'postgres')
 
 def _get_agg_period(agg_level, year, month):
