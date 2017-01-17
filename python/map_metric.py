@@ -243,6 +243,7 @@ if __name__ == '__main__':
     mapper = CongestionMapper(LOGGER, dbset, stylepath, templatepath, projectfile, ARGS.agg_level)
         
     for m in ARGS.metric:
+        mapper.set_metric(m)
         
         for year in YEARS:
             for month in YEARS[year]:
