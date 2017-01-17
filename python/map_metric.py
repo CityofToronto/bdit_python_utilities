@@ -42,9 +42,6 @@ import sys
 import logging
 import calendar
 #qgis imports
-
-from qgis.PyQt.QtXml import QDomDocument
-from qgis.gui import QgsMapCanvasLayer
 QGIS_CONSOLE = True #For testing in console
 if QGIS_CONSOLE:
     from qgis.utils import iface
@@ -52,12 +49,15 @@ else:
     from qgis.core import *
     from parsing_utils import parse_args, _validate_multiple_yyyymm_range, _get_timerange, format_fromto_hr
 
+from qgis.PyQt.QtXml import QDomDocument
+from qgis.gui import QgsMapCanvasLayer
+
 SQLS = {'year':"""(
 SELECT row_number() OVER (PARTITION BY metrics.agg_period ORDER BY metrics.{metric} DESC) AS "Rank",
     tmc_from_to_lookup.street_name AS "Street",
-    inrix_tmc_tor.direction AS "Dir",
+    gis.twochar_direction(inrix_tmc_tor.direction) AS "Dir",
     tmc_from_to_lookup.from_to AS "From - To",
-    to_char(metrics.{metric}, '9D99'::text) AS "{metric_name}",
+    to_char(metrics.{metric}, '0D99'::text) AS "{metric_name}",
     inrix_tmc_tor.geom
 FROM congestion.metrics
 JOIN congestion.aggregation_levels USING (agg_id)
@@ -244,7 +244,6 @@ if __name__ == '__main__':
     template = 'K:\\Big Data Group\\Data\\GIS\\Congestion_Reporting\\top_50_template.qpt'
     composerDict = loadPrintComposerTemplate(template, console=False)
     composition = composerDict['QgsComposition']
-    ms = composerDict['QgsMapSettings']
     map_registry = QgsMapLayerRegistry.instance()
     background_layers = get_background_layers(map_registry, BACKGROUND_LAYERNAMES)
     
@@ -258,6 +257,7 @@ if __name__ == '__main__':
                 else:
                     hour_iterator = range(ARGS.timeperiod[0], ARGS.timeperiod[0]+1)
                 for hour1 in hour_iterator:
+                    
                     hour2 = hour1 + 1 if ARGS.hours_iterate else ARGS.timeperiod[1]
                     timerange = _get_timerange(hour1, hour2)
                     layername = year + month + 'h' + hour1 + ARGS.agg_level
@@ -307,7 +307,7 @@ elif QGIS_CONSOLE:
     month = '01'
     hour1 = 17
     hour2 = 18
-    periodname = ''
+    periodname = 'PM Peak'
     timerange = _get_timerange(hour1, hour2)
     layername = '2015_pm_reliable'
     
@@ -325,6 +325,7 @@ elif QGIS_CONSOLE:
     
     layerslist = [QgsMapCanvasLayer(layer)] + background_layers
     iface.mapCanvas().setLayerSet(layerslist)
+    iface.mapCanvas().refresh()
     
     update_values = {'agg_period': _get_agg_period(agg_level, year, month),
                      'period_name': periodname,

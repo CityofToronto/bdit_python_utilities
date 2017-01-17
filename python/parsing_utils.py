@@ -97,9 +97,9 @@ def get_yyyymmdd(yyyy, mm, **kwargs):
         dd = '0'+str(kwargs['dd'])
     
     if mm < 10:
-        return str(yyyy)+'-0'+str(mm)+'-'+dd
+        return "'"+str(yyyy)+'-0'+str(mm)+'-'+dd+"'"
     else:
-        return str(yyyy)+'-'+str(mm)+'-'+dd
+        return "'"+str(yyyy)+'-'+str(mm)+'-'+dd+"'"
 
 def _format_hour_ampm(hr):
     '''Return a string hour with no leading zero and AM/PM'''
