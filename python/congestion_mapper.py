@@ -2,7 +2,9 @@
 '''Object definition for congestion mapping
 '''
 
-class congestion_mapper( object ):
+from iteration_mapper import iteration_mapper
+
+class CongestionMapper( IteratingMapper ):
     '''Holds settings for iterating over multiple congestion maps
     '''
     SQLS = {'year':"""(
@@ -38,70 +40,36 @@ class congestion_mapper( object ):
     COMPOSER_LABELS = {'map_title': '{agg_period} Top 50 {metric_attr} Road Segments',
                        'time_period': '{period_name} ({from_to_hours})',
                        'stat_description': '{stat_description}'}
+    IteratingMapper.COMPOSER_LABELS = COMPOSER_LABELS
     BACKGROUND_LAYERNAMES = [u'CENTRELINE_WGS84', u'to']
+    IteratingMapper.BACKGROUND_LAYERNAMES = BACKGROUND_LAYERNAMES
     
-    def __init__(self, logger, dbsettings, stylepath, templatepath, projectfile = None, console = False):
-        self.uri = _new_uri(dbsettings)
-        self.stylepath = stylepath
-        self.template = QDomDocument()
-        with open(templatepath, 'r') as templateFile:
-            templateContent = templateFile.read()
-            self.template.setContent(myTemplateContent)
-        
-        if projectfile:
-            #Open project
-        
-        printcomposer = load_print_composer(console=console)
-        self.composition = printcomposer['QgsComposition']
-        self.map_settings = printcomposer['QgsMapSettings']
-        self.composer_view = printcomposer['QgsComposerView']
-            
-        self.map_registry = QgsMapLayerRegistry.instance()
-        self.background_layers = get_background_layers(map_registry, BACKGROUND_LAYERNAMES)
     
-
-    @staticmethod
-    def _new_uri(dbset):
-    '''Create a new URI based on the database settings and return it
-
-    Args:
-        dbset: dictionary of database connection settings
+    def __init__(self, logger, dbsettings, stylepath, templatepath, agg_level, projectfile = None, console = False):
+        super(IteratingMapper, self).__init__(logger, dbsettings, stylepath, templatepath, projectfile = None, console = False)
+        self.agg_level = agg_level
+        self.metric = None
     
-    Returns:
-        PyQGIS uri object'''
-    uri = QgsDataSourceURI()
-    uri.setConnection(dbset['host'], "5432", dbset['database'], dbset['user'], dbset['password'])
-    return uri
-
-    def load_print_composer(console=True):
-        '''Load a print composer template from provided filename argument
+    def load_agg_layer(self, agg_period=None, timeperiod=None,
+                   layername=None):
+        '''Create a QgsVectorLayer from a connection and specified parameters
 
         Args:
-            template: readable .qpt template filename
-            console: boolean if method is used in QGIS console
+            uri: PyQGIS uri object
+            agg_level: string representing aggregation level, key to SQLS dict
+            agg_period: the starting aggregation date for the period as a string
+                digestible by PostgreSQL into a DATE
+            timeperiod: string representing a PostgreSQL timerange
+            layername: string name to give the layer
 
         Returns:
-            myComposition: a QgsComposerView loaded from the provided template
-            --mapSettings: a QgsMapSettings object associated with myComposition'''
+            QgsVectorLayer from the specified sql query with provided layername'''
         
-        composerView = None
+        sql = SQLS[self.agg_level]
+        sql = sql.format(timeperiod=timeperiod, agg_period=agg_period, metric=self.metric['sql_acronym'], metric_name=self.metric['metric_name'])
+        self.uri.setDataSource("", sql, "geom", "", "Rank")
+        self.layer = QgsVectorLayer(uri.uri(False), layername, 'postgres')
+        self.map_registry.addMapLayer(layer)
+        self.layer.loadNamedStyle(self.stylepath)
 
-        if console:
-            composerView = iface.createNewComposer()
-            composerView.composition().loadFromTemplate(self.template)
-            myComposition = composerView.composition()
-            mapSettings = myComposition.mapSettings()
-        else:
-            raise NotImplementedError('More work needs to be done for standalone')
-            canvas = QgsMapCanvas()
-            # Load our project
-            QgsProject.instance().read(QFileInfo(project_path))
-            bridge = QgsLayerTreeMapCanvasBridge(
-                QgsProject.instance().layerTreeRoot(), canvas)
-            bridge.setCanvasLayers()
-            mapSettings = QgsMapSettings()
-            myComposition = QgsComposition(mapSettings)
-            myComposition.loadFromTemplate(myDocument)
-        return {'QgsComposition': myComposition,
-                'QgsMapSettings': mapSettings,
-                'QgsComposerView': composerView}
+        

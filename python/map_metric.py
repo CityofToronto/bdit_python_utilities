@@ -49,6 +49,7 @@ else:
     from qgis.core import *
     from parsing_utils import parse_args, _validate_multiple_yyyymm_range, _get_timerange, format_fromto_hr
 
+from congestion_mapper import CongestionMapper
 from qgis.PyQt.QtXml import QDomDocument
 from qgis.gui import QgsMapCanvasLayer
 
@@ -239,12 +240,10 @@ if __name__ == '__main__':
     stylepath = "K:\\Big Data Group\\Data\\GIS\\Congestion_Reporting\\top50style.qml"
     template = 'K:\\Big Data Group\\Data\\GIS\\Congestion_Reporting\\top_50_template.qpt'
     
-    mapper = congestion_mapper(LOGGER, dbset, stylepath, templatepath, projectfile)
-    
-    #TODO Got to here
-    
+    mapper = CongestionMapper(LOGGER, dbset, stylepath, templatepath, projectfile, ARGS.agg_level)
+        
     for m in ARGS.metric:
-        metric = METRICS[m]
+        mapper.metric = METRICS[m]
         for year in YEARS:
             for month in YEARS[year]:
                 yyyymmdd = get_yyyymmdd(year, month)
@@ -257,14 +256,7 @@ if __name__ == '__main__':
                     hour2 = hour1 + 1 if ARGS.hours_iterate else ARGS.timeperiod[1]
                     timerange = _get_timerange(hour1, hour2)
                     layername = year + month + 'h' + hour1 + ARGS.agg_level
-                    layer = _get_agg_layer(URI, agg_level=ARGS.agg_level,
-                                           agg_period=yyyymmdd,
-                                           timeperiod=timerange,
-                                           metric=metric['sql_acronym'],
-                                           layername=layername,
-                                           metric_name=metric['metric_name'])
-                    map_registry.addMapLayer(layer)
-                    layer.loadNamedStyle(stylepath)
+                    
                     
                     update_values = {'agg_period': _get_agg_period(ARGS.agg_level, year, month),
                                      'period_name': ARGS.periodname,
