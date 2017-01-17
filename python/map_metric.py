@@ -243,7 +243,7 @@ if __name__ == '__main__':
     mapper = CongestionMapper(LOGGER, dbset, stylepath, templatepath, projectfile, ARGS.agg_level)
         
     for m in ARGS.metric:
-        mapper.metric = METRICS[m]
+        
         for year in YEARS:
             for month in YEARS[year]:
                 yyyymmdd = get_yyyymmdd(year, month)
@@ -257,14 +257,15 @@ if __name__ == '__main__':
                     timerange = _get_timerange(hour1, hour2)
                     layername = year + month + 'h' + hour1 + ARGS.agg_level
                     
-                    
+                    mapper.load_agg_layer(yyyymmdd, timerange, layername)
                     update_values = {'agg_period': _get_agg_period(ARGS.agg_level, year, month),
                                      'period_name': ARGS.periodname,
                                      'from_to_hours': format_fromto_hr(hour1, hour2), 
-                                     'stat_description': metric['stat_description'],
-                                     'metric_attr': metric['metric_attr']
+                                     'stat_description': mapper.metric['stat_description'],
+                                     'metric_attr': mapper.metric['metric_attr']
                                     }
-                    update_labels(composition, labels_update = update_values)
+                    mapper.update_labels(labels_update = update_values)
+                    
                     #TODO make sure only background_layers + new layer are loaded
             
 
