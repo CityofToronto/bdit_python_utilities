@@ -235,17 +235,13 @@ if __name__ == '__main__':
         LOGGER.critical(str(err))
         sys.exit(2)
         
-        
-    
-    #TODO load map template
-    URI = _new_uri(dbset)
     #TODO stylepath
     stylepath = "K:\\Big Data Group\\Data\\GIS\\Congestion_Reporting\\top50style.qml"
     template = 'K:\\Big Data Group\\Data\\GIS\\Congestion_Reporting\\top_50_template.qpt'
-    composerDict = loadPrintComposerTemplate(template, console=False)
-    composition = composerDict['QgsComposition']
-    map_registry = QgsMapLayerRegistry.instance()
-    background_layers = get_background_layers(map_registry, BACKGROUND_LAYERNAMES)
+    
+    mapper = congestion_mapper(LOGGER, dbset, stylepath, templatepath, projectfile)
+    
+    #TODO Got to here
     
     for m in ARGS.metric:
         metric = METRICS[m]
@@ -337,3 +333,5 @@ elif QGIS_CONSOLE:
     table = printcomposer['QgsComposition'].getComposerItemById('table').multiFrame()
     table.setVectorLayer(layer)
     printcomposer['QgsComposition'].refreshItems()
+    image = printcomposer['QgsComposition'].printPageAsRaster(0)
+    image.save(r"C:\Users\rdumas\Desktop\test.png")
