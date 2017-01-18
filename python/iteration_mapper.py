@@ -9,7 +9,7 @@ class IteratingMapper( object ):
     BACKGROUND_LAYERNAMES = []
     COMPOSER_LABELS = {}
     
-    def __init__(self, logger, dbsettings, stylepath, templatepath, projectfile = None, console = False):
+    def __init__(self, logger, dbsettings, stylepath, templatepath, projectfile = None, console = False, iface = None):
         self.logger = logger
         self.uri = self._new_uri(dbsettings)
         
@@ -28,7 +28,7 @@ class IteratingMapper( object ):
             self.project.read(QFileInfo(projectfile))
         
         self.logger.info('Loading print composer')
-        printcomposer = self._load_print_composer(console=console)
+        printcomposer = self._load_print_composer(console=console,iface=iface)
         self.composition = printcomposer['QgsComposition']
         self.map_settings = printcomposer['QgsMapSettings']
         self.composer_view = printcomposer['QgsComposerView']
@@ -114,6 +114,15 @@ class IteratingMapper( object ):
             None'''
         for label_id, label_text in labels_dict.items():
             self.composition.getComposerItemById(label_id).setText(label_text.format(**labels_update))
+    
+    def update_canvas(self, iface = None):
+        '''Update canvas with the new layer + background layers'''
+        layerslist = [QgsMapCanvasLayer(self.layer)] + self.background_layers
+        if iface is not None:
+            iface.mapCanvas().setLayerSet(layerslist)
+            iface.mapCanvas().refresh()
+        else:
+            raise NotImplementedError("This hasn't been developed for standalone")
     
     def print_map(self, printpath, filetype = 'png'):
         '''Print the map to the specified location
