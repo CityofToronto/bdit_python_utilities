@@ -240,6 +240,10 @@ if __name__ == '__main__':
     stylepath = "K:\\Big Data Group\\Data\\GIS\\Congestion_Reporting\\top50style.qml"
     template = 'K:\\Big Data Group\\Data\\GIS\\Congestion_Reporting\\top_50_template.qpt'
     
+    gui_flag = True
+    app = QgsApplication(sys.argv, gui_flag)
+    app.initQgis()
+    
     mapper = CongestionMapper(LOGGER, dbset, stylepath, templatepath, projectfile, ARGS.agg_level)
         
     for m in ARGS.metric:
@@ -267,11 +271,14 @@ if __name__ == '__main__':
                                     }
                     mapper.update_labels(labels_update = update_values)
                     
-                    #TODO make sure only background_layers + new layer are loaded
+                    mapper.update_table()
+                    mapper.print_map( )
+                    mapper.clear_layer()
+    mapper.project.clear()
+    app.exitQgis()
             
 
 elif QGIS_CONSOLE:
-    import ConfigParser
     import StringIO
     from datetime import time
     
