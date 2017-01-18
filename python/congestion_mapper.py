@@ -2,7 +2,7 @@
 '''Object definition for congestion mapping
 '''
 
-from iteration_mapper import iteration_mapper
+from iteration_mapper import IteratingMapper
 
 class CongestionMapper( IteratingMapper ):
     '''Holds settings for iterating over multiple congestion maps
@@ -46,7 +46,7 @@ class CongestionMapper( IteratingMapper ):
     
     
     def __init__(self, logger, dbsettings, stylepath, templatepath, agg_level, projectfile = None, console = False):
-        super(IteratingMapper, self).__init__(logger, dbsettings, stylepath, templatepath, projectfile = None, console = False)
+        super(CongestionMapper, self).__init__(logger, dbsettings, stylepath, templatepath, projectfile = None, console = False)
         self.agg_level = agg_level
         self.metric = None
     
@@ -55,8 +55,6 @@ class CongestionMapper( IteratingMapper ):
         '''Create a QgsVectorLayer from a connection and specified parameters
 
         Args:
-            uri: PyQGIS uri object
-            agg_level: string representing aggregation level, key to SQLS dict
             yyyymmdd: the starting aggregation date for the period as a string
                 digestible by PostgreSQL into a DATE
             timeperiod: string representing a PostgreSQL timerange
@@ -66,15 +64,24 @@ class CongestionMapper( IteratingMapper ):
             QgsVectorLayer from the specified sql query with provided layername'''
         
         sql = SQLS[self.agg_level]
-        sql = sql.format(timeperiod=timeperiod, agg_period=yyyymmdd, metric=self.metric['sql_acronym'], metric_name=self.metric['metric_name'])
+        sql = sql.format(timeperiod=timeperiod,
+                         agg_period=yyyymmdd,
+                         metric=self.metric['sql_acronym'],
+                         metric_name=self.metric['metric_name'])
         self.uri.setDataSource("", sql, "geom", "", "Rank")
-        self.layer = QgsVectorLayer(uri.uri(False), layername, 'postgres')
+        self.layer = QgsVectorLayer(self.uri.uri(False), layername, 'postgres')
         self.map_registry.addMapLayer(layer)
         self.layer.loadNamedStyle(self.stylepath)
     
     def set_metric(self, metric_id):
+        '''Set the metric for mapping based on the provided key
+        '''
         if metric_id not in METRICS:
             raise ValueError('{metric_id} is unsupported'.format(metric_id=metric_id))
         self.metric = METRICS[metric_id]
 
-        
+    def update_table(self):
+        '''Update the table in the composition to use current layer
+        '''
+        table = self.composition.getComposerItemById('table').multiFrame()
+        table.setVectorLayer(self.layer)
