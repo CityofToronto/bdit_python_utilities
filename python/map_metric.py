@@ -47,7 +47,7 @@ if QGIS_CONSOLE:
     from qgis.utils import iface
 else:
     from qgis.core import *
-    from parsing_utils import parse_args, _validate_multiple_yyyymm_range, _get_timerange, format_fromto_hr
+    from parsing_utils import parse_args, get_timerange, format_fromto_hr
 
 from qgis.PyQt.QtXml import QDomDocument
 from qgis.gui import QgsMapCanvasLayer
@@ -228,14 +228,6 @@ if __name__ == '__main__':
     CONFIG = configparser.ConfigParser()
     CONFIG.read(ARGS.dbsetting)
     dbset = CONFIG['DBSETTINGS']
-
-    try:
-        YEARS = _validate_multiple_yyyymm_range(ARGS.years)
-    except ValueError as err:
-        LOGGER.critical(str(err))
-        sys.exit(2)
-        
-        
     
     #TODO load map template
     URI = _new_uri(dbset)
@@ -249,7 +241,7 @@ if __name__ == '__main__':
     
     for m in ARGS.metric:
         metric = METRICS[m]
-        for year in YEARS:
+        for year in args.years:
             for month in YEARS[year]:
                 yyyymmdd = get_yyyymmdd(year, month)
                 if ARGS.hours_iterate:
@@ -259,7 +251,7 @@ if __name__ == '__main__':
                 for hour1 in hour_iterator:
                     
                     hour2 = hour1 + 1 if ARGS.hours_iterate else ARGS.timeperiod[1]
-                    timerange = _get_timerange(hour1, hour2)
+                    timerange = get_timerange(hour1, hour2)
                     layername = year + month + 'h' + hour1 + ARGS.agg_level
                     layer = _get_agg_layer(URI, agg_level=ARGS.agg_level,
                                            agg_period=yyyymmdd,
@@ -308,7 +300,7 @@ elif QGIS_CONSOLE:
     hour1 = 17
     hour2 = 18
     periodname = 'PM Peak'
-    timerange = _get_timerange(hour1, hour2)
+    timerange = get_timerange(hour1, hour2)
     layername = '2015_pm_reliable'
     
     # Begin iteration section

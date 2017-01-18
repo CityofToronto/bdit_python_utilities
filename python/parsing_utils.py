@@ -84,6 +84,10 @@ def parse_args(args, prog = None, usage = None):
     if parsed_args.periodname and parsed_args.hours_iterate:
         PARSER.error('--periodname should only be used with --timeperiod')
     _check_hours(PARSER, parsed_args.timeperiod if parsed_args.timeperiod else parsed_args.hours_iterate)
+    try:
+        parsed_args.years = validate_multiple_yyyymm_range(parsed_args.years)
+    except ValueError as err:
+        PARSER.error(err)
     return parsed_args
 
 def get_yyyymmdd(yyyy, mm, **kwargs):
@@ -193,7 +197,7 @@ def _validate_yyyymm_range(yyyymmrange, agg_level):
     
     return years
 
-def _validate_multiple_yyyymm_range(years_list, agg_level):
+def validate_multiple_yyyymm_range(years_list, agg_level):
     '''Validate a list of pairs of yearmonth strings
     
     Takes one or more lists like ['YYYYMM','YYYYMM'] and passes them to 
@@ -225,7 +229,7 @@ def _validate_multiple_yyyymm_range(years_list, agg_level):
                                                    set(years[year_to_add]))
     return years
 
-def _get_timerange(time1, time2):
+def get_timerange(time1, time2):
     '''Validate provided times and create a timerange string to be inserted into PostgreSQL
     
     Args:
