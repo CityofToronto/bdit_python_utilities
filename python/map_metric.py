@@ -53,41 +53,6 @@ from congestion_mapper import CongestionMapper
 from qgis.PyQt.QtXml import QDomDocument
 from qgis.gui import QgsMapCanvasLayer
 
-SQLS = {'year':"""(
-SELECT row_number() OVER (PARTITION BY metrics.agg_period ORDER BY metrics.{metric} DESC) AS "Rank",
-    tmc_from_to_lookup.street_name AS "Street",
-    gis.twochar_direction(inrix_tmc_tor.direction) AS "Dir",
-    tmc_from_to_lookup.from_to AS "From - To",
-    to_char(metrics.{metric}, '0D99'::text) AS "{metric_name}",
-    inrix_tmc_tor.geom
-FROM congestion.metrics
-JOIN congestion.aggregation_levels USING (agg_id)
-JOIN gis.inrix_tmc_tor USING (tmc)
-JOIN gis.tmc_from_to_lookup USING (tmc)
-WHERE inrix_tmc_tor.sum_miles > 0.124274 AND aggregation_levels.agg_level = 'year'
-AND metrics.timeperiod = {timeperiod} AND metrics.agg_period = {agg_period}::DATE
-ORDER BY metrics.{metric} DESC LIMIT 50)"""#,
-    #'quarter':''''''
-    #'month':''''''
-}
-
-METRICS = {'b':{'sql_acronym':'bti',
-                'metric_name':'Buffer Time Index',
-                'metric_attr':'Least Reliable',
-                'stat_description':'Buffer Time Index = (95th percentile Time - Median Time)/(Median Time)'
-               },
-           't':{'sql_acronym':'tti',
-                'metric_name': 'Travel Time Index',
-                'metric_attr':'Most Congested',
-                'stat_description':'Travel Time Index = Average Travel Time / Free Flow Travel Time'
-               }
-          }
-
-COMPOSER_LABELS = {'map_title': '{agg_period} Top 50 {metric_attr} Road Segments',
-                   'time_period': '{period_name} ({from_to_hours})',
-                   'stat_description': '{stat_description}'}
-BACKGROUND_LAYERNAMES = [u'CENTRELINE_WGS84', u'to']
-
 def _new_uri(dbset):
     '''Create a new URI based on the database settings and return it
 
@@ -280,53 +245,59 @@ elif QGIS_CONSOLE:
     config = ConfigParser.ConfigParser()
     config.readfp(buf)
     dbset = config._sections['DBSETTINGS']
-    URI = _new_uri(dbset)
     
-    map_registry = QgsMapLayerRegistry.instance()
+    FORMAT = '%(asctime)-15s %(message)s'
+    logging.basicConfig(level=logging.INFO, format=FORMAT)
+    LOGGER = logging.getLogger(__name__)
+    
     template = "K:\\Big Data Group\\Data\\GIS\\Congestion_Reporting\\top_50_template.qpt"
     stylepath = "K:\\Big Data Group\\Data\\GIS\\Congestion_Reporting\\top50style.qml"
-    
-    printcomposer = load_print_composer(template)
-
-    background_layers = get_background_layers(map_registry, BACKGROUND_LAYERNAMES)
+    print_directory = '' 
+    #print_format = ''
     
     # Setting up variables for iteration
-    agg_level = 'year'
-    metric = METRICS['b']
-    yyyymmdd = "'2015-01-01'"
-    year = '2015'
-    month = '01'
-    hour1 = 17
-    hour2 = 18
+    agg_level = 'year' #['year','quarter','month']
+    metrics = ['b'] #['b','t'] for bti, tti
+    yyyymmrange = [['20150101', '20150101']] 
+    #for multiple ranges
+    #yyyymmrange = [['201203', '201301'],['201207', '201209']] 
+    
+    years = validate_multiple_yyyymm_range(yyyymmrange, agg_level)
+    hours_iterate = []
+    timeperiod = []
     periodname = 'PM Peak'
-    timerange = get_timerange(hour1, hour2)
-    layername = '2015_pm_reliable'
     
-    # Begin iteration section
-    layer = _get_agg_layer(URI, agg_level=agg_level,
-                           agg_period=yyyymmdd,
-                           timeperiod=timerange,
-                           metric=metric['sql_acronym'],
-                           layername=layername,
-                           metric_name=metric['metric_name'])
+    mapper = CongestionMapper(LOGGER, dbset, stylepath, templatepath,
+                              projectfile, agg_level, console = True, iface = iface)
+    #TODO Fix this
+    mapper.background_layers = mapper.get_background_layers(layernamelist = CongestionMapper.BACKGROUND_LAYERNAMES)
     
-    
-    map_registry.addMapLayer(layer)
-    layer.loadNamedStyle(stylepath)
-    
-    layerslist = [QgsMapCanvasLayer(layer)] + background_layers
-    iface.mapCanvas().setLayerSet(layerslist)
-    iface.mapCanvas().refresh()
-    
-    update_values = {'agg_period': _get_agg_period(agg_level, year, month),
-                     'period_name': periodname,
-                     'from_to_hours': format_fromto_hr(hour1, hour2), 
-                     'stat_description': metric['stat_description'],
-                     'metric_attr': metric['metric_attr']
-                    }
-    update_labels(printcomposer['QgsComposition'], labels_update = update_values)
-    table = printcomposer['QgsComposition'].getComposerItemById('table').multiFrame()
-    table.setVectorLayer(layer)
-    printcomposer['QgsComposition'].refreshItems()
-    image = printcomposer['QgsComposition'].printPageAsRaster(0)
-    image.save(r"C:\Users\rdumas\Desktop\test.png")
+    for m in metrics:
+        mapper.set_metric(m)
+        for year in years:
+
+            for month in years[year]:
+                yyyymmdd = get_yyyymmdd(year, month)
+                if hours_iterate:
+                    hour_iterator = range(hours_iterate[0], hours_iterate[1]+1)
+                else:
+                    hour_iterator = range(timeperiod[0], timeperiod[0]+1)
+                for hour1 in hour_iterator:
+                    
+                    hour2 = hour1 + 1 if hours_iterate else timeperiod[1]
+                    timerange = get_timerange(hour1, hour2)
+                    layername = year + month + 'h' + hour1 + agg_level
+                    
+                    mapper.load_agg_layer(yyyymmdd, timerange, layername)
+                    mapper.update_canvas(iface = iface)
+                    update_values = {'agg_period': _get_agg_period(agg_level, year, month),
+                                     'period_name': periodname,
+                                     'from_to_hours': format_fromto_hr(hour1, hour2), 
+                                     'stat_description': mapper.metric['stat_description'],
+                                     'metric_attr': mapper.metric['metric_attr']
+                                    }
+                    mapper.update_labels(labels_update = update_values)
+                    
+                    mapper.update_table()
+                    mapper.print_map( )
+                    mapper.clear_layer()
