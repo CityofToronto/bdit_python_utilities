@@ -45,48 +45,15 @@ import calendar
 QGIS_CONSOLE = True #For testing in console
 if QGIS_CONSOLE:
     from qgis.utils import iface
+    lib_path = r"C:\Users\rdumas\Documents\GitHub\bdit_congestion\congestion_mapping\python"
+    sys.path.append(lib_path)
+    from parsing_utils import validate_multiple_yyyymm_range
 else:
     from qgis.core import *
-    from parsing_utils import parse_args, get_timerange, format_fromto_hr
+    from parsing_utils import parse_args
 
+from parsing_utils import get_timerange, format_fromto_hr, get_yyyymmdd
 from congestion_mapper import CongestionMapper
-from qgis.PyQt.QtXml import QDomDocument
-from qgis.gui import QgsMapCanvasLayer
-
-def _new_uri(dbset):
-    '''Create a new URI based on the database settings and return it
-
-    Args:
-        dbset: dictionary of database connection settings
-    
-    Returns:
-        PyQGIS uri object'''
-    uri = QgsDataSourceURI()
-    uri.setConnection(dbset['host'], "5432", dbset['database'], dbset['user'], dbset['password'])
-    return uri
-
-def _get_agg_layer(uri, agg_level=None, agg_period=None, timeperiod=None,
-                   layername=None, metric=None, metric_name= None):
-    '''Create a QgsVectorLayer from a connection and specified parameters
-
-    Args:
-        uri: PyQGIS uri object
-        agg_level: string representing aggregation level, key to SQLS dict
-        agg_period: the starting aggregation date for the period as a string
-            digestible by PostgreSQL into a DATE
-        timeperiod: string representing a PostgreSQL timerange
-        layername: string name to give the layer
-
-    Returns:
-        QgsVectorLayer from the specified sql query with provided layername'''
-    if agg_level not in SQLS:
-        raise ValueError('Aggregation level: {agg_level} not implemented'.format(
-            agg_level=agg_level))
-    
-    sql = SQLS[agg_level]
-    sql = sql.format(timeperiod=timeperiod, agg_period=agg_period, metric=metric, metric_name=metric_name)
-    uri.setDataSource("", sql, "geom", "", "Rank")
-    return QgsVectorLayer(uri.uri(False), layername, 'postgres')
 
 def _get_agg_period(agg_level, year, month):
     '''Create a text representation of the aggregation period
@@ -118,70 +85,6 @@ def _get_agg_period(agg_level, year, month):
         raise NotImplementedError('No support for {agg_level}'.format({'agg_level':agg_level}))
     return agg_period
 
-
-def update_labels(composition, labels_dict = COMPOSER_LABELS, labels_update = None):
-    '''Change the labels in the QgsComposition using a dictionary of update values
-    
-    Iterates over the keys (label ids) and values (strings to update) of the labels_dict
-    Finds the corresponding element of the composition, and updates it based on keys and 
-    values provided in labels_update.
-    
-    Args:
-        composition: the QgsComposition
-        labels_dict: dictionary of labels to change of form 
-            {'label_id':'label_text to {update_section}'}
-        labels_update: dictionary of values to update labels with
-            format: {'update_section':'update_value'}
-    Returns:
-        None'''
-    for label_id, label_text in labels_dict.items():
-        composition.getComposerItemById(label_id).setText(label_text.format(**labels_update))
-    
-
-def load_print_composer(template, console=True):
-    '''Load a print composer template from provided filename argument
-    
-    Args:
-        template: readable .qpt template filename
-        console: boolean if method is used in QGIS console
-        
-    Returns:
-        myComposition: a QgsComposerView loaded from the provided template
-        --mapSettings: a QgsMapSettings object associated with myComposition'''
-    # Load template from filename
-    myDocument = QDomDocument()
-    with open(template, 'r') as templateFile:
-        myTemplateContent = templateFile.read()
-        myDocument.setContent(myTemplateContent)
-    composerView = None
-    
-    if console:
-        composerView = iface.createNewComposer()
-        composerView.composition().loadFromTemplate(myDocument)
-        myComposition = composerView.composition()
-        mapSettings = myComposition.mapSettings()
-    else:
-        raise NotImplementedError('More work needs to be done for standalone')
-        canvas = QgsMapCanvas()
-        # Load our project
-        QgsProject.instance().read(QFileInfo(project_path))
-        bridge = QgsLayerTreeMapCanvasBridge(
-            QgsProject.instance().layerTreeRoot(), canvas)
-        bridge.setCanvasLayers()
-        mapSettings = QgsMapSettings()
-        myComposition = QgsComposition(mapSettings)
-        myComposition.loadFromTemplate(myDocument)
-    return {'QgsComposition': myComposition,
-            'QgsMapSettings': mapSettings,
-            'QgsComposerView': composerView}
-
-def get_background_layers(mapregistry, layernamelist):
-    '''Return background layers'''
-    
-    layers = [map_registry.mapLayersByName(name)[0] for name in layernamelist]
-    layerslist = [QgsMapCanvasLayer(layer) for layer in layers]
-    return layerslist
-
 if __name__ == '__main__':
     #Configure logging
     FORMAT = '%(asctime)-15s %(message)s'
@@ -200,10 +103,10 @@ if __name__ == '__main__':
     template = 'K:\\Big Data Group\\Data\\GIS\\Congestion_Reporting\\top_50_template.qpt'
     
     gui_flag = True
-    app = QgsApplication(sys.argv, gui_flag)
+    app = QgsApplication([], gui_flag)
     app.initQgis()
     
-    mapper = CongestionMapper(LOGGER, dbset, stylepath, templatepath, projectfile, ARGS.agg_level)
+    mapper = CongestionMapper(LOGGER, dbset, stylepath, templatepath, projectfile, ARGS.Aggregation)
         
     for m in ARGS.metric:
         mapper.set_metric(m)
@@ -219,10 +122,10 @@ if __name__ == '__main__':
                     
                     hour2 = hour1 + 1 if ARGS.hours_iterate else ARGS.timeperiod[1]
                     timerange = get_timerange(hour1, hour2)
-                    layername = year + month + 'h' + hour1 + ARGS.agg_level
+                    layername = year + month + 'h' + hour1 + ARGS.Aggregation
                     
                     mapper.load_agg_layer(yyyymmdd, timerange, layername)
-                    update_values = {'agg_period': _get_agg_period(ARGS.agg_level, year, month),
+                    update_values = {'agg_period': _get_agg_period(ARGS.Aggregation, year, month),
                                      'period_name': ARGS.periodname,
                                      'from_to_hours': format_fromto_hr(hour1, hour2), 
                                      'stat_description': mapper.metric['stat_description'],
@@ -239,6 +142,7 @@ if __name__ == '__main__':
 
 elif QGIS_CONSOLE:
     import StringIO
+    import ConfigParser
     from datetime import time
     
     buf = StringIO.StringIO(s_config)
@@ -250,28 +154,26 @@ elif QGIS_CONSOLE:
     logging.basicConfig(level=logging.INFO, format=FORMAT)
     LOGGER = logging.getLogger(__name__)
     
-    template = "K:\\Big Data Group\\Data\\GIS\\Congestion_Reporting\\top_50_template.qpt"
+    templatepath = "K:\\Big Data Group\\Data\\GIS\\Congestion_Reporting\\top_50_template.qpt"
     stylepath = "K:\\Big Data Group\\Data\\GIS\\Congestion_Reporting\\top50style.qml"
-    print_directory = '' 
+    print_directory = r"C:\Users\rdumas\Documents\test\\"
     #print_format = ''
     
     # Setting up variables for iteration
     agg_level = 'year' #['year','quarter','month']
     metrics = ['b'] #['b','t'] for bti, tti
-    yyyymmrange = [['20150101', '20150101']] 
+    yyyymmrange = [['201501', '201501']] 
     #for multiple ranges
     #yyyymmrange = [['201203', '201301'],['201207', '201209']] 
     
     years = validate_multiple_yyyymm_range(yyyymmrange, agg_level)
     hours_iterate = []
-    timeperiod = []
+    timeperiod = [17,18]
     periodname = 'PM Peak'
     
     mapper = CongestionMapper(LOGGER, dbset, stylepath, templatepath,
-                              projectfile, agg_level, console = True, iface = iface)
-    #TODO Fix this
-    mapper.background_layers = mapper.get_background_layers(layernamelist = CongestionMapper.BACKGROUND_LAYERNAMES)
-    
+                              agg_level, console = True, iface = iface)
+
     for m in metrics:
         mapper.set_metric(m)
         for year in years:
@@ -286,7 +188,11 @@ elif QGIS_CONSOLE:
                     
                     hour2 = hour1 + 1 if hours_iterate else timeperiod[1]
                     timerange = get_timerange(hour1, hour2)
-                    layername = year + month + 'h' + hour1 + agg_level
+                    if periodname is not None:
+                        timeval = periodname.replace(' ','').lower()
+                    else:
+                        timeval = str(hour1)
+                    layername = str(year) + str(month) + 'h' + timeval + agg_level
                     
                     mapper.load_agg_layer(yyyymmdd, timerange, layername)
                     mapper.update_canvas(iface = iface)
@@ -296,8 +202,9 @@ elif QGIS_CONSOLE:
                                      'stat_description': mapper.metric['stat_description'],
                                      'metric_attr': mapper.metric['metric_attr']
                                     }
-                    mapper.update_labels(labels_update = update_values)
+                    #TODO Fix this hack
+                    mapper.update_labels(labels_dict = CongestionMapper.COMPOSER_LABELS, labels_update = update_values)
                     
                     mapper.update_table()
-                    mapper.print_map( )
-                    mapper.clear_layer()
+                    mapper.print_map(print_directory + layername + '.png' )
+                    #mapper.clear_layer()

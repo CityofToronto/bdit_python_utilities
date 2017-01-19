@@ -2,6 +2,7 @@
 '''Object definition for congestion mapping
 '''
 
+from qgis.core import QgsVectorLayer
 from iteration_mapper import IteratingMapper
 
 class CongestionMapper( IteratingMapper ):
@@ -45,10 +46,11 @@ class CongestionMapper( IteratingMapper ):
     IteratingMapper.BACKGROUND_LAYERNAMES = BACKGROUND_LAYERNAMES
     
     
-    def __init__(self, logger, dbsettings, stylepath, templatepath, agg_level, projectfile = None, console = False):
-        super(CongestionMapper, self).__init__(logger, dbsettings, stylepath, templatepath, projectfile = None, console = False)
+    def __init__(self, logger, dbsettings, stylepath, templatepath, agg_level, *args, **kwargs):
+        super(CongestionMapper, self).__init__(logger, dbsettings, stylepath, templatepath, *args, **kwargs)
         self.agg_level = agg_level
         self.metric = None
+        self.background_layers = self.get_background_layers(self.BACKGROUND_LAYERNAMES)
     
     def load_agg_layer(self, yyyymmdd=None, timeperiod=None,
                    layername=None):
@@ -63,22 +65,22 @@ class CongestionMapper( IteratingMapper ):
         Returns:
             QgsVectorLayer from the specified sql query with provided layername'''
         
-        sql = SQLS[self.agg_level]
+        sql = self.SQLS[self.agg_level]
         sql = sql.format(timeperiod=timeperiod,
                          agg_period=yyyymmdd,
                          metric=self.metric['sql_acronym'],
                          metric_name=self.metric['metric_name'])
         self.uri.setDataSource("", sql, "geom", "", "Rank")
         self.layer = QgsVectorLayer(self.uri.uri(False), layername, 'postgres')
-        self.map_registry.addMapLayer(layer)
+        self.map_registry.addMapLayer(self.layer)
         self.layer.loadNamedStyle(self.stylepath)
     
     def set_metric(self, metric_id):
         '''Set the metric for mapping based on the provided key
         '''
-        if metric_id not in METRICS:
+        if metric_id not in self.METRICS:
             raise ValueError('{metric_id} is unsupported'.format(metric_id=metric_id))
-        self.metric = METRICS[metric_id]
+        self.metric = self.METRICS[metric_id]
 
     def update_table(self):
         '''Update the table in the composition to use current layer

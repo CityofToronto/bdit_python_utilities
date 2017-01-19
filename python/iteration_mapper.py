@@ -9,7 +9,7 @@ class IteratingMapper( object ):
     BACKGROUND_LAYERNAMES = []
     COMPOSER_LABELS = {}
     
-    def __init__(self, logger, dbsettings, stylepath, templatepath, projectfile = None, console = False, iface = None):
+    def __init__(self, logger, dbsettings, stylepath, templatepath, *args, **kwargs):
         self.logger = logger
         self.uri = self._new_uri(dbsettings)
         
@@ -21,14 +21,14 @@ class IteratingMapper( object ):
             self.template.setContent(templateContent)
         
         self.project = None
-        if projectfile:
+        if kwargs.get('projectfile', False):
             raise NotImplementedError('Loading projects causes Python to crash')
             self.logger.info('Loading project')
             self.project = QgsProject.instance()
-            self.project.read(QFileInfo(projectfile))
+            self.project.read(QFileInfo(kwargs.pop('projectfile', None)))
         
         self.logger.info('Loading print composer')
-        printcomposer = self._load_print_composer(console=console,iface=iface)
+        printcomposer = self._load_print_composer(console=kwargs.pop('console', False), iface=kwargs.pop('iface', None))
         self.composition = printcomposer['QgsComposition']
         self.map_settings = printcomposer['QgsMapSettings']
         self.composer_view = printcomposer['QgsComposerView']
@@ -97,7 +97,7 @@ class IteratingMapper( object ):
         layerslist = [QgsMapCanvasLayer(layer) for layer in layers]
         return layerslist
 
-    def update_labels(self, labels_dict = COMPOSER_LABELS, labels_update = None):
+    def update_labels(self, labels_dict = None, labels_update = None):
         '''Change the labels in the QgsComposition using a dictionary of update values
 
         Iterates over the keys (label ids) and values (strings to update) of the labels_dict
@@ -105,13 +105,15 @@ class IteratingMapper( object ):
         values provided in labels_update.
 
         Args:
-            composition: the QgsComposition
             labels_dict: dictionary of labels to change of form 
                 {'label_id':'label_text to {update_section}'}
             labels_update: dictionary of values to update labels with
                 format: {'update_section':'update_value'}
         Returns:
             None'''
+        if labels_dict is None:
+            labels_dict = type(self).COMPOSER_LABELS
+        self.logger.info("Updating labels %s", labels_dict)
         for label_id, label_text in labels_dict.items():
             self.composition.getComposerItemById(label_id).setText(label_text.format(**labels_update))
     
