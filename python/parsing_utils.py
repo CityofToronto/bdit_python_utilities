@@ -16,6 +16,11 @@ import logging
 import re
 from datetime import time
 
+def fullmatch(regex, string, flags=0):
+    """Emulate python-3.4 re.fullmatch().
+    source: http://stackoverflow.com/a/30212799/4047679"""
+    return re.match("(?:" + regex + r")\Z", string, flags=flags)
+
 def _check_hour(parser, hour):
     if hour < 0 or hour > 24:
         raise parser.error('{} must be between 0 and 24'.format(hour))
@@ -85,7 +90,7 @@ def parse_args(args, prog = None, usage = None):
         PARSER.error('--periodname should only be used with --timeperiod')
     _check_hours(PARSER, parsed_args.timeperiod if parsed_args.timeperiod else parsed_args.hours_iterate)
     try:
-        parsed_args.years = validate_multiple_yyyymm_range(parsed_args.years)
+        parsed_args.range = validate_multiple_yyyymm_range(parsed_args.range, parsed_args.Aggregation)
     except ValueError as err:
         PARSER.error(err)
     return parsed_args
@@ -157,7 +162,7 @@ def _validate_yyyymm_range(yyyymmrange, agg_level):
     years = {}
     
     for yyyymm in yyyymmrange:
-        if regex_yyyymm.fullmatch(yyyymm):
+        if fullmatch(regex_yyyymm.pattern, yyyymm):
             if agg_level == 'year' and int(yyyymm[-2:]) != 1:
                 raise ValueError('For annual aggregation, month must be 01 not {yyyymm}'
                                  .format(yyyymm=yyyymm))
@@ -177,10 +182,10 @@ def _validate_yyyymm_range(yyyymmrange, agg_level):
     if agg_level == 'year':
         #Only add January for each year to be mapped
         if yyyy[0] == yyyy[1]:
-            years[yyyy[0]] = 1
+            years[yyyy[0]] = [1]
         else:
             for year in range(yyyy[0], yyyy[1]+1):
-                years[year] = 1
+                years[year] = [1]
     else: 
         #Iterate over years and months with specified aggregation step 
         #(month or quarter)
