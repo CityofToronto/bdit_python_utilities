@@ -14,6 +14,32 @@ This folder contains `sql` scripts to create the `congestion` schema ([`new_tabl
 This folder contains a python command-line application to iterate over a range of dates and metrics and print maps from QGIS.
 This application is currently only tested with QGIS `2.14.X`
 
+#### Contents:
+
+##### iteration_mapper
+
+Base object for iterating map creation with PyQGIS. 
+
+##### congestion_mapper
+
+Inherits from `iteration_mapper`. Includes:  
+ - `SQL`: base `sql` scripts for each metric type
+ - `COMPOSER_LABELS`: content to change in the QGIS composer labels
+ - `BACKGROUND_LABELS`: background layer names
+
+Additional methods:  
+ - `load_agg_layer()`: loads a layer of metrics based on the specific metric, aggregation level, timeperiod, and aggregation period
+ - `set_metric()`: Set the metric for mapping based on the provided key
+ - `update_table()`: Update the table in the composition to use current metric layer
+
+
+##### parsing_utils
+
+##### map_metric
+
+
+
+
 ## Usage
 
 ### Setup

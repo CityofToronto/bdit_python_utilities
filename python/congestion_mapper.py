@@ -7,6 +7,20 @@ from iteration_mapper import IteratingMapper
 
 class CongestionMapper( IteratingMapper ):
     '''Holds settings for iterating over multiple congestion maps
+    
+    Inherits from IteratingMapper
+    
+    Attributes:
+        agg_level: The aggregation level to use
+        metric: The metric currently being mapped.
+        SQLS: static dictionary holding base sql scripts for loading layers depending on
+            aggregation level and metric
+        METRICS: static dictionary holding strings for each metric to be used to update 
+            composer levels or SQLS scripts
+        COMPOSER_LABELS: static dictionary holding base string labels for the print 
+            composer to be updated for each map
+        BACKGROUND_LAYERS: static list holding the names of the background layers to be 
+            displayed on the map
     '''
     SQLS = {'year':"""(
     SELECT row_number() OVER (PARTITION BY metrics.agg_period ORDER BY metrics.{metric} DESC) AS "Rank",
@@ -47,6 +61,8 @@ class CongestionMapper( IteratingMapper ):
     
     
     def __init__(self, logger, dbsettings, stylepath, templatepath, agg_level, *args, **kwargs):
+        '''Initialize CongestionMapper and parent object
+        '''
         super(CongestionMapper, self).__init__(logger, dbsettings, stylepath, templatepath, *args, **kwargs)
         self.agg_level = agg_level
         self.metric = None

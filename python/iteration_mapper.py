@@ -4,12 +4,23 @@ from qgis.PyQt.QtCore import QFileInfo
 from qgis.PyQt.QtXml import QDomDocument
 
 class IteratingMapper( object ):
-    '''Holds settings for iterating over multiple congestion maps
+    '''Holds settings for iterating over multiple maps
+    
+    Attributes:
+        logger: logging.logger object for logging messages
+        dbsettings: dictionary of database connection string parameters
+        stylepath: string filepath to load the metric layer's style 
+        templatepath: string filepath to load the print composer template
+        projectfile: (optional) if using standalone script string filepath to load the
+            project
+        console: (optional) boolean value indicating whether QGIS Python console is used
+        iface: (optional) qgis.utils.iface object, used in QGIS Python console
     '''
     BACKGROUND_LAYERNAMES = []
     COMPOSER_LABELS = {}
     
     def __init__(self, logger, dbsettings, stylepath, templatepath, *args, **kwargs):
+        '''Initiates IteratingMapper with logger, dbsettings, stylepath, templatepath'''
         self.logger = logger
         self.uri = self._new_uri(dbsettings)
         
@@ -57,6 +68,7 @@ class IteratingMapper( object ):
         Args:
             template: QDomDocument object read from a file
             console: boolean if method is used in QGIS console
+            iface: qgis.utils.iface object if method is used in QGIS console
 
         Returns:
             composition: a QGSCompsition loaded from the provided template 
@@ -146,10 +158,12 @@ class IteratingMapper( object ):
             raise NotImplementError('{filetype} is not supported'.format(filetype=filetype))
     
     def clear_layer(self):
+        '''Remove added layer'''
         self.map_registry.removeMapLayer(self.layer)
         self.layer = None
     
     def close_project(self):
+        '''Close the project, if loaded'''
         if self.project is not None:
             self.project.clear()
             self.project = None
