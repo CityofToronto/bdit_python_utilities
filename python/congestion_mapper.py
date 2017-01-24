@@ -1,12 +1,12 @@
 #! python3
-'''Object definition for congestion mapping
-'''
+"""Object definition for congestion mapping
+"""
 
 from qgis.core import QgsVectorLayer
 from iteration_mapper import IteratingMapper
 
 class CongestionMapper( IteratingMapper ):
-    '''Holds settings for iterating over multiple congestion maps
+    """Holds settings for iterating over multiple congestion maps
     
     Inherits from IteratingMapper
     
@@ -21,7 +21,7 @@ class CongestionMapper( IteratingMapper ):
             composer to be updated for each map
         BACKGROUND_LAYERS: static list holding the names of the background layers to be 
             displayed on the map
-    '''
+    """
     SQLS = {'year':"""(
     SELECT row_number() OVER (PARTITION BY metrics.agg_period ORDER BY metrics.{metric} DESC) AS "Rank",
         tmc_from_to_lookup.street_name AS "Street",
@@ -61,8 +61,8 @@ class CongestionMapper( IteratingMapper ):
     
     
     def __init__(self, logger, dbsettings, stylepath, templatepath, agg_level, *args, **kwargs):
-        '''Initialize CongestionMapper and parent object
-        '''
+        """Initialize CongestionMapper and parent object
+        """
         super(CongestionMapper, self).__init__(logger, dbsettings, stylepath, templatepath, *args, **kwargs)
         self.agg_level = agg_level
         self.metric = None
@@ -70,7 +70,7 @@ class CongestionMapper( IteratingMapper ):
     
     def load_agg_layer(self, yyyymmdd=None, timeperiod=None,
                    layername=None):
-        '''Create a QgsVectorLayer from a connection and specified parameters
+        """Create a QgsVectorLayer from a connection and specified parameters
 
         Args:
             yyyymmdd: the starting aggregation date for the period as a string
@@ -79,7 +79,7 @@ class CongestionMapper( IteratingMapper ):
             layername: string name to give the layer
 
         Returns:
-            QgsVectorLayer from the specified sql query with provided layername'''
+            QgsVectorLayer from the specified sql query with provided layername"""
         
         sql = self.SQLS[self.agg_level]
         sql = sql.format(timeperiod=timeperiod,
@@ -92,14 +92,14 @@ class CongestionMapper( IteratingMapper ):
         self.layer.loadNamedStyle(self.stylepath)
     
     def set_metric(self, metric_id):
-        '''Set the metric for mapping based on the provided key
-        '''
+        """Set the metric for mapping based on the provided key
+        """
         if metric_id not in self.METRICS:
             raise ValueError('{metric_id} is unsupported'.format(metric_id=metric_id))
         self.metric = self.METRICS[metric_id]
 
     def update_table(self):
-        '''Update the table in the composition to use current layer
-        '''
+        """Update the table in the composition to use current layer
+        """
         table = self.composition.getComposerItemById('table').multiFrame()
         table.setVectorLayer(self.layer)

@@ -4,7 +4,9 @@ from qgis.PyQt.QtCore import QFileInfo
 from qgis.PyQt.QtXml import QDomDocument
 
 class IteratingMapper( object ):
-    '''Holds settings for iterating over multiple maps
+    """Hold settings for iterating over multiple maps.
+    
+    This is a base object for holding necessary attributes for opening a QGIS print composer template, adding background layers, then iterating over the creation of new layers and saving them as images. 
     
     Attributes:
         logger: logging.logger object for logging messages
@@ -15,12 +17,12 @@ class IteratingMapper( object ):
             project
         console: (optional) boolean value indicating whether QGIS Python console is used
         iface: (optional) qgis.utils.iface object, used in QGIS Python console
-    '''
+    """
     BACKGROUND_LAYERNAMES = []
     COMPOSER_LABELS = {}
     
     def __init__(self, logger, dbsettings, stylepath, templatepath, *args, **kwargs):
-        '''Initiates IteratingMapper with logger, dbsettings, stylepath, templatepath'''
+        """Initiate IteratingMapper with logger, dbsettings, stylepath, templatepath"""
         self.logger = logger
         self.uri = self._new_uri(dbsettings)
         
@@ -51,19 +53,19 @@ class IteratingMapper( object ):
         self.logger.info('Mapper created successfully')
     
     def _new_uri(self, dbset):
-        '''Create a new URI based on the database settings and return it
+        """Create a new URI based on the database settings and return it
 
         Args:
             dbset: dictionary of database connection settings
 
         Returns:
-            PyQGIS uri object'''
+            PyQGIS uri object"""
         uri = QgsDataSourceURI()
         uri.setConnection(dbset['host'], "5432", dbset['database'], dbset['user'], dbset['password'])
         return uri
 
     def _load_print_composer(self, console=True, template = None, iface = None):
-        '''Load a print composer template from object template or template argument
+        """Load a print composer template from object template or template argument
 
         Args:
             template: QDomDocument object read from a file
@@ -74,7 +76,7 @@ class IteratingMapper( object ):
             composition: a QGSCompsition loaded from the provided template 
             composerView: a QgsComposerView loaded from the provided template 
                 (QGIS Python Console only)
-            mapSettings: a QgsMapSettings object associated with composition'''
+            mapSettings: a QgsMapSettings object associated with composition"""
         
         if template is None:
             template = self.template
@@ -103,14 +105,14 @@ class IteratingMapper( object ):
                 'QgsComposerView': composerView}
     
     def get_background_layers(self, layernamelist = BACKGROUND_LAYERNAMES):
-        '''Return background layers'''
+        """Return background layers"""
 
         layers = [self.map_registry.mapLayersByName(name)[0] for name in layernamelist]
         layerslist = [QgsMapCanvasLayer(layer) for layer in layers]
         return layerslist
 
     def update_labels(self, labels_dict = None, labels_update = None):
-        '''Change the labels in the QgsComposition using a dictionary of update values
+        """Change the labels in the QgsComposition using a dictionary of update values
 
         Iterates over the keys (label ids) and values (strings to update) of the labels_dict
         Finds the corresponding element of the composition, and updates it based on keys and 
@@ -122,7 +124,7 @@ class IteratingMapper( object ):
             labels_update: dictionary of values to update labels with
                 format: {'update_section':'update_value'}
         Returns:
-            None'''
+            None"""
         if labels_dict is None:
             labels_dict = type(self).COMPOSER_LABELS
         self.logger.info("Updating labels %s", labels_dict)
@@ -130,7 +132,7 @@ class IteratingMapper( object ):
             self.composition.getComposerItemById(label_id).setText(label_text.format(**labels_update))
     
     def update_canvas(self, iface = None):
-        '''Update canvas with the new layer + background layers'''
+        """Update canvas with the new layer + background layers"""
         layerslist = [QgsMapCanvasLayer(self.layer)] + self.background_layers
         if iface is not None:
             iface.mapCanvas().setLayerSet(layerslist)
@@ -139,14 +141,14 @@ class IteratingMapper( object ):
             raise NotImplementedError("This hasn't been developed for standalone")
     
     def print_map(self, printpath, filetype = 'png'):
-        '''Print the map to the specified location
+        """Print the map to the specified location
         
         Args:
             printpath: string path to print to
             filetype: ['png','pdf'] determines type of image to print
         Raises:
             NotImplementedError: If filetype is not supported
-        '''
+        """
         
         self.composition.refreshItems()
         if filetype == 'png':
@@ -158,12 +160,12 @@ class IteratingMapper( object ):
             raise NotImplementError('{filetype} is not supported'.format(filetype=filetype))
     
     def clear_layer(self):
-        '''Remove added layer'''
+        """Remove added layer"""
         self.map_registry.removeMapLayer(self.layer)
         self.layer = None
     
     def close_project(self):
-        '''Close the project, if loaded'''
+        """Close the project, if loaded"""
         if self.project is not None:
             self.project.clear()
             self.project = None

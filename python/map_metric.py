@@ -45,8 +45,8 @@ import calendar
 QGIS_CONSOLE = True #For testing in console
 if QGIS_CONSOLE:
     from qgis.utils import iface
-    lib_path = r"C:\Users\rdumas\Documents\GitHub\bdit_congestion\congestion_mapping\python"
-    sys.path.append(lib_path)
+    repo_path = r"C:\Users\rdumas\Documents\GitHub\bdit_congestion\congestion_mapping\python"
+    sys.path.append(repo_path)
     from parsing_utils import validate_multiple_yyyymm_range
 else:
     from qgis.core import *

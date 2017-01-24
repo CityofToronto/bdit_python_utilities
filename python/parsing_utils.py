@@ -1,6 +1,6 @@
 #map_metric.py
 #! python3
-'''Parsing utilities for map_metric.py
+"""Parsing utilities for map_metric.py
 
 Public Functions:
     parse_args(args, prog = None, usage = None):
@@ -8,9 +8,19 @@ Public Functions:
 
     get_yyyymmdd(yyyy, mm, **kwargs):
         Combine integer yyyy and mm into a string date yyyy-mm-dd. 
-
     
-    '''
+    fullmatch(regex, string, flags=0):
+        Emulate python-3.4 re.fullmatch().
+    
+    format_fromto_hr(hour1, hour2):
+        Format hour1-hour2 as a string and append AM/PM
+        
+    validate_multiple_yyyymm_range(years_list, agg_level):
+        Validate a list of pairs of yearmonth strings
+        
+    get_timerange(time1, time2):
+        Validate provided times and create a timerange string to be inserted into PostgreSQL
+    """
 import argparse
 import logging
 import re
@@ -35,7 +45,7 @@ def _check_hours(parser, hours):
         _check_hour(parser, hours if type(hours) is int else hours[0])
 
 def parse_args(args, prog = None, usage = None):
-    '''Parse command line arguments
+    """Parse command line arguments
     
     Args:
         sys.argv[1]: command line arguments
@@ -44,7 +54,7 @@ def parse_args(args, prog = None, usage = None):
         
     Returns:
         dictionary of parsed arguments
-    '''
+    """
     PARSER = argparse.ArgumentParser(description='Produce maps of congestion metrics (tti, bti) for '
                                                  'different aggregation periods, timeperiods, and '
                                                  'aggregation levels', prog=prog, usage=usage)
@@ -96,7 +106,7 @@ def parse_args(args, prog = None, usage = None):
     return parsed_args
 
 def get_yyyymmdd(yyyy, mm, **kwargs):
-    '''Combine integer yyyy and mm into a string date yyyy-mm-dd.'''
+    """Combine integer yyyy and mm into a string date yyyy-mm-dd."""
     
     if 'dd' not in kwargs:
         dd = '01'    
@@ -111,11 +121,11 @@ def get_yyyymmdd(yyyy, mm, **kwargs):
         return "'"+str(yyyy)+'-'+str(mm)+'-'+dd+"'"
 
 def _format_hour_ampm(hr):
-    '''Return a string hour with no leading zero and AM/PM'''
+    """Return a string hour with no leading zero and AM/PM"""
     return '{:d} {}'.format(int(hr.strftime("%I")), hr.strftime("%p"))
 
 def format_fromto_hr(hour1, hour2):
-    '''Format hour1-hour2 as a string and append AM/PM'''
+    """Format hour1-hour2 as a string and append AM/PM"""
     from_to_hour = '{from_hour}-{to_hour}'
     hr1 = time(hour1)
     to_hour = None
@@ -132,7 +142,7 @@ def format_fromto_hr(hour1, hour2):
     return from_to_hour.format(from_hour=from_hour, to_hour=to_hour)
 
 def _validate_yyyymm_range(yyyymmrange, agg_level):
-    '''Validate the two yyyymm command line arguments provided
+    """Validate the two yyyymm command line arguments provided
 
     Args:
         yyyymmrange: List containing a start and end year-month in yyyymm format
@@ -144,7 +154,7 @@ def _validate_yyyymm_range(yyyymmrange, agg_level):
     
     Raises:
         ValueError: If the values entered are incorrect
-    '''
+    """
 
     #if agg_level not in SQLS:
     #    raise ValueError('Aggregation level: {agg_level} not implemented'.format(agg_level=agg_level))
@@ -203,7 +213,7 @@ def _validate_yyyymm_range(yyyymmrange, agg_level):
     return years
 
 def validate_multiple_yyyymm_range(years_list, agg_level):
-    '''Validate a list of pairs of yearmonth strings
+    """Validate a list of pairs of yearmonth strings
     
     Takes one or more lists like ['YYYYMM','YYYYMM'] and passes them to 
     _validate_yyyymm_range then merges them back into a dictionary of
@@ -219,7 +229,7 @@ def validate_multiple_yyyymm_range(years_list, agg_level):
     
     Returns:
         a dictionary of years[YYYY] = [month1, month2, etc]
-    '''
+    """
     years = {}
     if len(years_list) == 1:
         years = _validate_yyyymm_range(years_list[0], agg_level)
@@ -235,7 +245,7 @@ def validate_multiple_yyyymm_range(years_list, agg_level):
     return years
 
 def get_timerange(time1, time2):
-    '''Validate provided times and create a timerange string to be inserted into PostgreSQL
+    """Validate provided times and create a timerange string to be inserted into PostgreSQL
     
     Args:
         time1: Integer first hour
@@ -243,7 +253,7 @@ def get_timerange(time1, time2):
         
     Returns:
         String representation creating a PostgreSQL timerange object
-    '''
+    """
     if time1 == time2:
         raise ValueError('2nd time parameter {time2} must be at least 1 hour after first parameter {time1}'.format(time1=time1, time2=time2))
         
