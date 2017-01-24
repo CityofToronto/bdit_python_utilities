@@ -20,20 +20,58 @@ This application is currently only tested with QGIS `2.14.X`
 
 Base object for iterating map creation with PyQGIS. 
 
+**Attributes:**
+ - `logger`: logging.logger object for logging messages
+ - `dbsettings`: dictionary of database connection string parameters
+ - `stylepath`: string filepath to load the metric layer's style 
+ - `templatepath`: string filepath to load the print composer template
+ - `projectfile`: (optional) if using standalone script string filepath to load the project
+ - `console`: (optional) boolean value indicating whether QGIS Python console is used
+ - `iface`: (optional) qgis.utils.iface object, used in QGIS Python console
+ 
+**Public functions:**
+ - `get_background_layers(layernamelist = BACKGROUND_LAYERNAMES)`: Return background layers
+ - `update_labels(labels_dict = None, labels_update = None)`: Change the labels in the QgsComposition using a dictionary of update values
+ - `update_canvas(iface = None)`: Update canvas with the new layer + background layers
+ - `print_map(printpath, filetype = 'png')`: Print the map to the specified location
+ - `clear_layer()`: Remove added layer
+ - `close_project()`: Close the project, if loaded
+
 ##### congestion_mapper
 
-Inherits from `iteration_mapper`. Includes:  
+Inherits from `iteration_mapper`. 
+
+**Attributes:**  
  - `SQL`: base `sql` scripts for each metric type
  - `COMPOSER_LABELS`: content to change in the QGIS composer labels
+ - `METRICS`: dictionary of metric attributes
  - `BACKGROUND_LABELS`: background layer names
+ - `agg_level`: string representing the aggregation level
+ - `metric`: dictionary of metric attributes derived from METRICS
 
-Additional methods:  
+**Additional functions:**  
  - `load_agg_layer()`: loads a layer of metrics based on the specific metric, aggregation level, timeperiod, and aggregation period
  - `set_metric()`: Set the metric for mapping based on the provided key
  - `update_table()`: Update the table in the composition to use current metric layer
 
 
 ##### parsing_utils
+
+Parsing utilities for `map_metric.py` includign parsing command-line arguments. 
+
+**Public Functions**:
+ - `parse_args(args, prog = None, usage = None)`:
+        Parse command line argument
+ - `get_yyyymmdd(yyyy, mm, **kwargs)`:
+        Combine integer yyyy and mm into a string date yyyy-mm-dd. 
+ - `fullmatch(regex, string, flags=0)`:
+        Emulate python-3.4 re.fullmatch().
+ - `format_fromto_hr(hour1, hour2)`:
+        Format hour1-hour2 as a string and append AM/PM
+ - `validate_multiple_yyyymm_range(years_list, agg_level)`:
+        Validate a list of pairs of yearmonth strings
+ - `get_timerange(time1, time2)`:
+        Validate provided times and create a timerange string to be inserted into PostgreSQL
 
 ##### map_metric
 
