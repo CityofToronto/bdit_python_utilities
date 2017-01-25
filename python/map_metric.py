@@ -37,13 +37,11 @@ optional arguments:
                         Table containing metrics congestion.metrics
 """
 
-#TODO import stuff
+
 import sys
 import logging
 import calendar
-#qgis imports
-QGIS_CONSOLE = True #For testing in console
-if QGIS_CONSOLE:
+if __name__ == '__console__':  #PyQGIS console
     from qgis.utils import iface
     repo_path = r"C:\Users\rdumas\Documents\GitHub\bdit_congestion\congestion_mapping\python"
     sys.path.append(repo_path)
@@ -140,7 +138,7 @@ if __name__ == '__main__':
     app.exitQgis()
             
 
-elif QGIS_CONSOLE:
+elif __name__ == '__console__':
     import StringIO
     import ConfigParser
     from datetime import time
