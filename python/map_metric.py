@@ -115,7 +115,7 @@ if __name__ == '__main__':
                 if ARGS.hours_iterate:
                     hour_iterator = range(ARGS.hours_iterate[0], ARGS.hours_iterate[1]+1)
                 else:
-                    hour_iterator = range(ARGS.timeperiod[0], ARGS.timeperiod[0]+1)
+                    hour_iterator = [ARGS.timeperiod[0]]
                 for hour1 in hour_iterator:
                     
                     hour2 = hour1 + 1 if ARGS.hours_iterate else ARGS.timeperiod[1]
@@ -141,17 +141,9 @@ if __name__ == '__main__':
 elif __name__ == '__console__':
     import StringIO
     import ConfigParser
-    from datetime import time
     
-    buf = StringIO.StringIO(s_config)
-    config = ConfigParser.ConfigParser()
-    config.readfp(buf)
-    dbset = config._sections['DBSETTINGS']
-    
-    FORMAT = '%(asctime)-15s %(message)s'
-    logging.basicConfig(level=logging.INFO, format=FORMAT)
-    LOGGER = logging.getLogger(__name__)
-    
+    # Variables to change
+    # Paths
     templatepath = "K:\\Big Data Group\\Data\\GIS\\Congestion_Reporting\\top_50_template.qpt"
     stylepath = "K:\\Big Data Group\\Data\\GIS\\Congestion_Reporting\\top50style.qml"
     print_directory = r"C:\Users\rdumas\Documents\test\\"
@@ -163,11 +155,26 @@ elif __name__ == '__console__':
     yyyymmrange = [['201501', '201501']] 
     #for multiple ranges
     #yyyymmrange = [['201203', '201301'],['201207', '201209']] 
-    
-    years = validate_multiple_yyyymm_range(yyyymmrange, agg_level)
     hours_iterate = []
     timeperiod = [17,18]
     periodname = 'PM Peak'
+    # Copy and paste your db.cfg file between the quotes
+    s_config = '''
+    '''
+    
+    # The script can take it from here.
+    
+    buf = StringIO.StringIO(s_config)
+    config = ConfigParser.ConfigParser()
+    config.readfp(buf)
+    dbset = config._sections['DBSETTINGS']
+    
+    FORMAT = '%(asctime)-15s %(message)s'
+    logging.basicConfig(level=logging.INFO, format=FORMAT)
+    LOGGER = logging.getLogger(__name__)
+    
+    
+    years = validate_multiple_yyyymm_range(yyyymmrange, agg_level)
     
     mapper = CongestionMapper(LOGGER, dbset, stylepath, templatepath,
                               agg_level, console = True, iface = iface)
@@ -181,7 +188,7 @@ elif __name__ == '__console__':
                 if hours_iterate:
                     hour_iterator = range(hours_iterate[0], hours_iterate[1]+1)
                 else:
-                    hour_iterator = range(timeperiod[0], timeperiod[0]+1)
+                    hour_iterator = [timeperiod[0]]
                 for hour1 in hour_iterator:
                     
                     hour2 = hour1 + 1 if hours_iterate else timeperiod[1]
