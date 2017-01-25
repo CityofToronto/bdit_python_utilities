@@ -75,27 +75,82 @@ Parsing utilities for `map_metric.py` includign parsing command-line arguments.
 
 ##### map_metric
 
+Main method. Contains logic for cycling over multiple years, hours of
+the day, and metrics to load layers from the PostgreSQL DB, add them to a
+template map and then print them to a png.
 
-
+Detects whether the script is being called from the PyQGIS Console by checking `if __name__ == '__console__'`
 
 ## Usage
 
 ### Setup
 1. Run the files in the [`sql` folder](#sql) to set up the congestion schema.
-2. Process congestion metrics in the database using the `process_congestion_metrics` function
+2. Process congestion metrics in the database using the `process_congestion_metrics` SQL function
 3. The Python element requires a working [QGIS installation](http://www.qgis.org/en/site/forusers/download.html)
-4. Set up a Python virtual environment for developing with QGIS based on [these instructions](http://gis.stackexchange.com/a/223325/36886).
+4. If wanting to work on the script outside of QGIS, set up a Python virtual environment for developing with QGIS based on [these instructions](http://gis.stackexchange.com/a/223325/36886).
 
 ### Using the Python application
+The script is designed for use as a standalone command-line application as well as a script that can be opened within QGIS.
 
 #### In the QGIS Python Console
+*Only tested in QGIS LTR versions `2.14.8` and above*
+
+1. Open the congestion QGIS project to automate.
+2. Open the QGIS Python Console ![](img/qgis_python.png)
+3. Reveal the editor by clicking on the highlighted button  
+![](img/show_editor.png)
+4. Open the `map_metric.py` script from this repo in the editor. The script should automagically detect that it's being run from the QGIS console, but there are some variables to edit.
+
+##### Variables to edit in `map_metric.py`
+
+1. `repo_path`:  Search for the first `if __name__ == '__console__':` block. `repo_path` helps the script find the other modules in this project to import. So change  
+
+    `repo_path = r"C:\path\to\repo"`
+2. **variables for what you want to map**: Search for the second `if __name__ == '__console__':` block. You'll find the below
+```python
+    # Variables to change
+    # Paths
+    templatepath = "K:\\Big Data Group\\Data\\GIS\\Congestion_Reporting\\top_50_template.qpt"
+    stylepath = "K:\\Big Data Group\\Data\\GIS\\Congestion_Reporting\\top50style.qml"
+    print_directory = r"C:\Users\rdumas\Documents\test\\"
+    #print_format = ''
+    
+    # Setting up variables for iteration
+    agg_level = 'year' #['year','quarter','month']
+    metrics = ['b'] #['b','t'] for bti, tti
+    yyyymmrange = [['201501', '201501']] 
+    #for multiple ranges
+    #yyyymmrange = [['201203', '201301'],['201207', '201209']] 
+    hours_iterate = []
+    timeperiod = [17,18]
+    periodname = 'PM Peak'
+    # Copy and paste your db.cfg file between the quotes
+    s_config = '''
+    '''
+```
+`templatepath` is the path to the print composer template
+`stylepath` is the path to the style for the aggregation layer
+`print_directory` is the directory to save the images
+The other variables should be fairly explanatory.
+
+    `hours_iterate` and `timeperiod` are mutually exclusive variables. `hours_iterate` should be a list of a start hour and end hour to produce an hourly map. `timeperiod` produces one map per aggregation period (year, quarter, or month) for a metric aggregated over [starthour, endhour] and a `periodname` (e.g. PM Peak, Daytime) can be supplied.
+
+3. After those changes have been made, hit the play arrow to run the script file. Be patient, it can take around 1 minute to load the print composer.
+4. The images should be saved in the specified folder. It's now safe to close the project. Before you do it's probably wiser to not save the loaded layers, there have been random problems where projects are unable to open due to these layers somehow corrupting the project file.
 
 #### Command-line Application
-
+****
+**Untested**
+****
 ## Challenges Solved
 
 ### Programming in PyQGIS
 What a killer
 
+### Python Objects
+
+
 ## Next Steps and How to Contribute
 This project is currently a work in progress. Have a look at the [project kanban board](https://github.com/CityofToronto/bdit_congestion/projects/1) and the [opened issues in the milestone](https://github.com/CityofToronto/bdit_congestion/milestone/1)
+
+### How to extend
