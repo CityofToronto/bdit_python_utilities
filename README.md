@@ -136,7 +136,7 @@ The other variables should be fairly explanatory.
     `hours_iterate` and `timeperiod` are mutually exclusive variables. `hours_iterate` should be a list of a start hour and end hour to produce an hourly map. `timeperiod` produces one map per aggregation period (year, quarter, or month) for a metric aggregated over [starthour, endhour] and a `periodname` (e.g. PM Peak, Daytime) can be supplied.
 
 3. After those changes have been made, hit the play arrow to run the script file. Be patient, it can take around 1 minute to load the print composer.
-4. The images should be saved in the specified folder. It's now safe to close the project. Before you do it's probably wiser to not save the loaded layers, there have been random problems where projects are unable to open due to these layers somehow corrupting the project file.
+4. The images should be saved in the specified folder. It's now safe to close the project. Before you do it's probably wiser to not save the loaded layers, there have been random problems where projects are unable to open due to these layers somehow corrupting the project file. If the project file does become un-openable follow the troubleshooting [here](https://gis.stackexchange.com/questions/221621/how-to-fix-corrupted-qgis-project-file-that-causes-windows-to-freeze)
 
 #### Command-line Application
 ****
@@ -145,12 +145,34 @@ The other variables should be fairly explanatory.
 ## Challenges Solved
 
 ### Programming in PyQGIS
-What a killer
+I thought that more documentation existed for PyQGIS before starting this project. I was mistaken. Three resources used were:  
 
+1. The [PyQGIS Cookbook](http://docs.qgis.org/testing/en/docs/pyqgis_developer_cookbook/), useful for startup but rather sparse (and occasionally wrong)
+2. The [PyQGIS tag](https://gis.stackexchange.com/questions/tagged/pyqgis) on GIS.se. Beware of undocumented changes to the API!
+3. [The QGIS API Documentation](http://qgis.org/api/2.14/) (Very sparse)
+
+An important thing to note from the [Cookbook's introduction](http://docs.qgis.org/testing/en/docs/pyqgis_developer_cookbook/intro.html) is that there are 4 different ways to interact with QGIS in Python, and the API is different for each:  
+ - automatically run Python code when QGIS starts
+ - issue commands in Python console within QGIS
+ - create and use plugins in Python
+ - create custom applications based on QGIS API
+
+Some questions/challenges that were overcome (in order):
+ - [Why do I get a NameError for QDomDocument when attempting to programmatically load a template in the QGIS Python console?](https://gis.stackexchange.com/questions/221580/why-do-i-get-a-nameerror-for-qdomdocument-when-attempting-to-programmatically-lo)
+ - [How to fix corrupted QGIS project file that causes Windows to freeze?](https://gis.stackexchange.com/questions/221621/how-to-fix-corrupted-qgis-project-file-that-causes-windows-to-freeze)
+ - [Loading QgsComposition from template without throwing “QgsComposition constructor is deprecated”?](https://gis.stackexchange.com/questions/222717/loading-qgscomposition-from-template-without-throwing-qgscomposition-constructo)
+ - [How to show a QgsComposition created in the QGIS Python console?](https://gis.stackexchange.com/questions/222748/how-to-show-a-qgscomposition-created-in-the-qgis-python-console)
+ - [Programmatically changing layers in QGIS Print Composer?](https://gis.stackexchange.com/questions/223999/programmatically-changing-layers-in-qgis-print-composer)
+ - [PyQGIS get existing ComposerAttributeTable from composition?](http://gis.stackexchange.com/q/224164/36886)
 ### Python Objects
+While working on this project at some point PyLint threw a warning because too many parameters were being passed in a function. Searching for this warning on StackOverflow led to [the answer](http://stackoverflow.com/a/816517):
+>Some of the 10 arguments are presumably related. Group them into an object, and pass that instead.
 
+This tied into another consideration: **Given that there are going to be more/other maps to automate, how do we make this project flexible/extensible to other tasks?** Is there a way to store and group variables and methods that are generalizable to other iterative mapping tasks into an object that can then be inherited for more specific tasks? **Yes.** This is the `IterationMapper` class, which is inherited by the `CongestionMapper` class. 
 
 ## Next Steps and How to Contribute
 This project is currently a work in progress. Have a look at the [project kanban board](https://github.com/CityofToronto/bdit_congestion/projects/1) and the [opened issues in the milestone](https://github.com/CityofToronto/bdit_congestion/milestone/1)
 
 ### How to extend
+
+`IterationMapper` is the base class for iterating maps in QGIS. For new mapping tasks this baseclass should be inherited in the spirit of `CongestionMapper`. The methods in `parsing_utils.py` are (mostly) specific to processing inputs related to congestion mapping, but the `parse_args()` method could be modified to process command-line inputs for different applications. There may be a way to have a generalizable argument parser that could be subclassed for future applications.
