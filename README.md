@@ -107,7 +107,7 @@ The script is designed for use as a standalone command-line application as well 
 
     `repo_path = r"C:\path\to\repo"`
 2. **variables for what you want to map**: Search for the second `if __name__ == '__console__':` block. You'll find the below
-```python
+    ```python
     # Variables to change
     # Paths
     templatepath = "K:\\Big Data Group\\Data\\GIS\\Congestion_Reporting\\top_50_template.qpt"
@@ -127,13 +127,12 @@ The script is designed for use as a standalone command-line application as well 
     # Copy and paste your db.cfg file between the quotes
     s_config = '''
     '''
-```
-`templatepath` is the path to the print composer template
-`stylepath` is the path to the style for the aggregation layer
-`print_directory` is the directory to save the images
-The other variables should be fairly explanatory.
-
-    `hours_iterate` and `timeperiod` are mutually exclusive variables. `hours_iterate` should be a list of a start hour and end hour to produce an hourly map. `timeperiod` produces one map per aggregation period (year, quarter, or month) for a metric aggregated over [starthour, endhour] and a `periodname` (e.g. PM Peak, Daytime) can be supplied.
+    ```  
+   `templatepath` is the path to the print composer template  
+   `stylepath` is the path to the style for the aggregation layer  
+   `print_directory` is the directory to save the images  
+   `hours_iterate` and `timeperiod` are mutually exclusive variables. `hours_iterate` should be a list of a start hour and end hour to produce an hourly map. `timeperiod` produces one map per aggregation period (year, quarter, or month) for a metric aggregated over [starthour, endhour] and a `periodname` (e.g. PM Peak, Daytime) can be supplied.
+   The other variables should be fairly explanatory.  
 
 3. After those changes have been made, hit the play arrow to run the script file. Be patient, it can take around 1 minute to load the print composer.
 4. The images should be saved in the specified folder. It's now safe to close the project. Before you do it's probably wiser to not save the loaded layers, there have been random problems where projects are unable to open due to these layers somehow corrupting the project file. If the project file does become un-openable follow the troubleshooting [here](https://gis.stackexchange.com/questions/221621/how-to-fix-corrupted-qgis-project-file-that-causes-windows-to-freeze)
@@ -164,6 +163,7 @@ Some questions/challenges that were overcome (in order):
  - [How to show a QgsComposition created in the QGIS Python console?](https://gis.stackexchange.com/questions/222748/how-to-show-a-qgscomposition-created-in-the-qgis-python-console)
  - [Programmatically changing layers in QGIS Print Composer?](https://gis.stackexchange.com/questions/223999/programmatically-changing-layers-in-qgis-print-composer)
  - [PyQGIS get existing ComposerAttributeTable from composition?](http://gis.stackexchange.com/q/224164/36886)
+
 ### Python Objects
 While working on this project at some point PyLint threw a warning because too many parameters were being passed in a function. Searching for this warning on StackOverflow led to [the answer](http://stackoverflow.com/a/816517):
 >Some of the 10 arguments are presumably related. Group them into an object, and pass that instead.
