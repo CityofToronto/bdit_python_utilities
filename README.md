@@ -96,9 +96,9 @@ The script is designed for use as a standalone command-line application as well 
 *Only tested in QGIS LTR versions `2.14.8` and above*
 
 1. Open the congestion QGIS project to automate.
-2. Open the QGIS Python Console ![](img/qgis_python.png)
+2. Open the QGIS Python Console ![](img/qgis_python.PNG)
 3. Reveal the editor by clicking on the highlighted button  
-![](img/show_editor.png)
+![](img/show_editor.PNG)
 4. Open the `map_metric.py` script from this repo in the editor. The script should automagically detect that it's being run from the QGIS console, but there are some variables to edit.
 
 ##### Variables to edit in `map_metric.py`
