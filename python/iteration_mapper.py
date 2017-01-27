@@ -110,6 +110,20 @@ class IteratingMapper( object ):
         layers = [self.map_registry.mapLayersByName(name)[0] for name in layernamelist]
         layerslist = [QgsMapCanvasLayer(layer) for layer in layers]
         return layerslist
+    
+    def load_layer(self, layer_name, provider_name):
+        """Load a vector layer based on the object's URI with layer_name, and provider_name
+        
+        Args:
+            layer_name : name for the layer
+            provider_name: name of the provider
+        Returns:
+            self
+        """
+        self.layer = QgsVectorLayer(self.uri.uri(False), layer_name, provider_name)
+        self.map_registry.addMapLayer(self.layer)
+        self.layer.loadNamedStyle(self.stylepath)
+        return self
 
     def update_labels(self, labels_dict = None, labels_update = None):
         """Change the labels in the QgsComposition using a dictionary of update values

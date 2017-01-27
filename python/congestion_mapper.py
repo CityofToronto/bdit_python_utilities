@@ -86,11 +86,11 @@ class CongestionMapper( IteratingMapper ):
                          agg_period=yyyymmdd,
                          metric=self.metric['sql_acronym'],
                          metric_name=self.metric['metric_name'])
+        # params: (schema, 'tablename', geom column, WHERE clause, gid)
         self.uri.setDataSource("", sql, "geom", "", "Rank")
-        self.layer = QgsVectorLayer(self.uri.uri(False), layername, 'postgres')
-        self.map_registry.addMapLayer(self.layer)
-        self.layer.loadNamedStyle(self.stylepath)
-    
+        self.load_layer(layername, 'postgres')
+        
+            
     def set_metric(self, metric_id):
         """Set the metric for mapping based on the provided key
         """
