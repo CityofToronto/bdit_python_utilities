@@ -1,7 +1,7 @@
-﻿/*
+/*
 Author: Raphael Dumas
 Inputs: aggregation level, from month, to month
-Processes aggregate Inrix data into Travel Time Index and Buffer Time Index over the specified period and using the specified aggregation level
+Processes aggregate Inrix data into Travel Time Index and Buffer Time Index over the specified period and using the specified aggregation level. The aggregation level is used in the date_trunc() function in order to do a GROUP BY the dates truncated to that particular period. 
 */
 
 CREATE OR REPLACE FUNCTION congestion.process_metrics(agg_lvl varchar(9), from_mon DATE, to_mon DATE)

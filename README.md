@@ -10,6 +10,24 @@ You can follow progress at [this Github milestone](https://github.com/CityofToro
 ### sql
 This folder contains `sql` scripts to create the `congestion` schema ([`new_tables.sql`](sql/new_tables.sql)) including the creation of a custom `timerange` type to contain timeperiods. From there [`aggregation_levels`](sql/aggregation_levels.sql) inserts aggregation levels into that table. [`process_congestion_metrics.sql`](sql/process_congestion_metrics.sql) creates functions for aggregating the congestion metrics (bti, tti) from the `inrix.agg_extract_hour` table and inserting them into `congestion.metrics`.
 
+#### Processing Congestion Metrics
+This function can be called with either of the two following sets of parameters:
+
+ - Hourly aggregation
+   agg_lvl varchar(9), from_mon DATE, to_mon DATE
+ - Custom timeperiod 
+   agg_lvl varchar(9), from_mon DATE, to_mon DATE, timeperiod timerange
+
+`agg_lvl` is matched to a specified aggregation level in `congestion.aggregation_levels`. These are keywords to the [`date_trunc`](https://www.postgresql.org/docs/9.6/static/functions-datetime.html#FUNCTIONS-DATETIME-TRUNC) function, which is how the metrics get aggregated over an aggregation period. Aggregation levels must therefore be an acceptable parameter to the [`date_trunc`](https://www.postgresql.org/docs/9.6/static/functions-datetime.html#FUNCTIONS-DATETIME-TRUNC) function. 
+
+There are only two sanity checks on `from_mon` and `to_mon`: 
+1. Whether `from_mon` is before `to_mon`
+2. That both have a day = 1
+
+There are no sanity checks on whether the days spanned by `from_mon-to_mon` is actually greater than the specified aggregation level so the following is possible `SELECT congestion.process_metrics('year', '2015-01-01'::DATE, '2015-08-01'::DATE)`, which would aggregate those 7 months as a 'year'.
+
+If the optional parameter `timeperiod` is not specified, the function will aggregate each hour of the day individually. Otherwise it will take aggregate only over the specified timerange.
+
 ### python
 This folder contains a python command-line application to iterate over a range of dates and metrics and print maps from QGIS.
 This application is currently only tested with QGIS `2.14.X`
