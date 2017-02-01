@@ -237,4 +237,24 @@ This project is currently a work in progress. Have a look at the [project kanban
 
 ### How to extend
 
-`IterationMapper` is the base class for iterating maps in QGIS. For new mapping tasks this baseclass should be inherited in the spirit of `CongestionMapper`. The methods in `parsing_utils.py` are (mostly) specific to processing inputs related to congestion mapping, but the `parse_args()` method could be modified to process command-line inputs for different applications. There may be a way to have a generalizable argument parser that could be subclassed for future applications.
+#### In QGIS 
+1. Set up a new QGIS project with background layers properly styled. Note these layernames and to add them to the `BACKGROUND_LAYERNAMES` list.
+2. Load a sample layer of data and style it. Save the style to a style file.
+3. Set up the print composer.
+4. When adding labels to the print composer, note their ids to add to the `COMPOSER_LABELS` dictionary.
+
+   ![](img/composer_items.PNG)
+5. Save the print composer as a template with `Composer > Save as Template...`
+
+#### In Python 
+`IterationMapper` is the base class for iterating maps in QGIS. For new mapping tasks this baseclass should be inherited in the spirit of `CongestionMapper`. `BACKGROUND_LAYERNAMES` and `COMPOSER_LABELS` should be modified for the new composition, noting the elements from the QGIS project and print composer template as per above. `COMPOSER_LABELS` is a dictionary that takes the following form, where each id in the print composer is a key, and the string to be formatted is its corresponding value. In the string to be formatted, insert placeholder variables in curly braces `{agg_period}` where these elements of the string will be generated when automating. Have a look at [Using % and .format() for great good!](https://pyformat.info/)
+
+```python
+COMPOSER_LABELS = {'map_title': '{agg_period} Top 50 {metric_attr} Road Segments'}
+```
+
+A new method to generate layers from SQL like `CongestionMapper.load_agg_layer()` would need to be written, which prepares custom SQL and then assigns it to the URI with `self.uri.setDataSource("", sql, "geom", "", "Rank")` before calling `IterationMapper.load_layer()`. 
+
+The methods in `parsing_utils.py` are (mostly) specific to processing inputs related to congestion mapping, and the `parse_args()` method could be modified to process command-line inputs for different applications. There may be a way to have a generalizable argument parser that could be subclassed for future applications.
+
+`map_metric.py` only contains code to set up the `CongestionMapper` from either command-line or scripted input, and then loop over metrics, years and months to call layer loading methods, updating labels, and finally printing. 
