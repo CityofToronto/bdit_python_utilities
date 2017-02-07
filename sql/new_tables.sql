@@ -71,6 +71,23 @@ CREATE TABLE metrics (
 
 
 --
+-- Name: map_metrics; Type: TABLE; Schema: congestion; Owner: -
+--
+
+
+CREATE TABLE map_metrics
+(
+  "Rank" smallint,
+  "Street" TEXT,
+  "Dir" TEXT,
+  "From - To" TEXT,
+  "Metric" TEXT,
+  geom Geometry
+);
+COMMENT ON TABLE map_metrics IS 'Abstract table to return layers for mapping in a plgpsql function';
+
+
+--
 -- Name: agg_id; Type: DEFAULT; Schema: congestion; Owner: -
 --
 
