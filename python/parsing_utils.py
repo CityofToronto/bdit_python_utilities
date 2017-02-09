@@ -114,7 +114,7 @@ def get_yyyymmdd(yyyy, mm, **kwargs):
         dd = str(kwargs['dd'])
     elif kwargs['dd'] < 10:
         dd = '0'+str(kwargs['dd'])
-    
+            
     if mm < 10:
         return "'"+str(yyyy)+'-0'+str(mm)+'-'+dd+"'"
     else:

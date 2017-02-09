@@ -2,8 +2,10 @@
 """Object definition for congestion mapping
 """
 
+from datetime import time
 from qgis.core import QgsVectorLayer
 from iteration_mapper import IteratingMapper
+from parsing_utils import get_yyyymmdd
 
 class CongestionMapper( IteratingMapper ):
     """Holds settings for iterating over multiple congestion maps
@@ -13,32 +15,13 @@ class CongestionMapper( IteratingMapper ):
     Attributes:
         agg_level: The aggregation level to use
         metric: The metric currently being mapped.
-        SQLS: static dictionary holding base sql scripts for loading layers depending on
-            aggregation level and metric
         METRICS: static dictionary holding strings for each metric to be used to update 
-            composer levels or SQLS scripts
+            composer levels or in SQL scripts
         COMPOSER_LABELS: static dictionary holding base string labels for the print 
             composer to be updated for each map
         BACKGROUND_LAYERS: static list holding the names of the background layers to be 
             displayed on the map
     """
-    SQLS = {'year':"""(
-    SELECT row_number() OVER (PARTITION BY metrics.agg_period ORDER BY metrics.{metric} DESC) AS "Rank",
-        tmc_from_to_lookup.street_name AS "Street",
-        gis.twochar_direction(inrix_tmc_tor.direction) AS "Dir",
-        tmc_from_to_lookup.from_to AS "From - To",
-        to_char(metrics.{metric}, '0D99'::text) AS "{metric_name}",
-        inrix_tmc_tor.geom
-    FROM congestion.metrics
-    JOIN congestion.aggregation_levels USING (agg_id)
-    JOIN gis.inrix_tmc_tor USING (tmc)
-    JOIN gis.tmc_from_to_lookup USING (tmc)
-    WHERE inrix_tmc_tor.sum_miles > 0.124274 AND aggregation_levels.agg_level = 'year'
-    AND metrics.timeperiod = {timeperiod} AND metrics.agg_period = {agg_period}::DATE
-    ORDER BY metrics.{metric} DESC LIMIT 50)"""#,
-        #'quarter':''''''
-        #'month':''''''
-    }
 
     METRICS = {'b':{'sql_acronym':'bti',
                     'metric_name':'Buffer Time Index',
@@ -68,7 +51,7 @@ class CongestionMapper( IteratingMapper ):
         self.metric = None
         self.background_layers = self.get_background_layers(self.BACKGROUND_LAYERNAMES)
     
-    def load_agg_layer(self, yyyymmdd=None, timeperiod=None,
+    def load_agg_layer(self, year, month, time1, time2, yyyymmdd=None, 
                    layername=None):
         """Create a QgsVectorLayer from a connection and specified parameters
 
@@ -81,9 +64,26 @@ class CongestionMapper( IteratingMapper ):
         Returns:
             QgsVectorLayer from the specified sql query with provided layername"""
         
-        sql = self.SQLS[self.agg_level]
-        sql = sql.format(timeperiod=timeperiod,
-                         agg_period=yyyymmdd,
+        if time1 == time2:
+            raise ValueError('2nd time parameter {time2} must be at least 1 hour after first parameter {time1}'.format(time1=time1, time2=time2))
+        
+        starttime = time(int(time1)).isoformat()
+
+        #If the second time is 24, aka midnight, replace with maximum possible time for the range
+        if time2 == 24:
+            endtime = '24:00'
+        else:
+            endtime = time(int(time2)).isoformat()
+
+        if starttime > endtime:
+            raise ValueError('start time {starttime} after end time {endtime}'.format(starttime=starttime, endtime=endtime))
+        
+        sql = '''(SELECT (congestion.map_metrics('{agg_lvl}', '{agg_period}'::DATE, '{starttime}'::TIME,
+         '{endtime}'::TIME, '{metric}', '{metric_name}')).* )''' 
+        sql = sql.format(agg_lvl=self.agg_level,
+                         starttime=starttime, 
+                         endtime=endtime
+                         agg_period=get_yyyymmdd(year, month),
                          metric=self.metric['sql_acronym'],
                          metric_name=self.metric['metric_name'])
         # params: (schema, 'tablename', geom column, WHERE clause, gid)

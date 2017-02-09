@@ -50,7 +50,7 @@ else:
     from qgis.core import *
     from parsing_utils import parse_args
 
-from parsing_utils import get_timerange, format_fromto_hr, get_yyyymmdd
+from parsing_utils import get_timerange, format_fromto_hr
 from congestion_mapper import CongestionMapper
 
 def _get_agg_period(agg_level, year, month):
@@ -111,7 +111,7 @@ if __name__ == '__main__':
         for year in args.years:
 
             for month in YEARS[year]:
-                yyyymmdd = get_yyyymmdd(year, month)
+                
                 if ARGS.hours_iterate:
                     hour_iterator = range(ARGS.hours_iterate[0], ARGS.hours_iterate[1]+1)
                 else:
@@ -122,7 +122,7 @@ if __name__ == '__main__':
                     timerange = get_timerange(hour1, hour2)
                     layername = year + month + 'h' + hour1 + ARGS.Aggregation
                     
-                    mapper.load_agg_layer(yyyymmdd, timerange, layername)
+                    mapper.load_agg_layer(year, month, timerange, layername)
                     update_values = {'agg_period': _get_agg_period(ARGS.Aggregation, year, month),
                                      'period_name': ARGS.periodname,
                                      'from_to_hours': format_fromto_hr(hour1, hour2), 
@@ -184,7 +184,6 @@ elif __name__ == '__console__':
         for year in years:
 
             for month in years[year]:
-                yyyymmdd = get_yyyymmdd(year, month)
                 if hours_iterate:
                     hour_iterator = range(hours_iterate[0], hours_iterate[1]+1)
                 else:
@@ -199,7 +198,7 @@ elif __name__ == '__console__':
                         timeval = str(hour1)
                     layername = str(year) + str(month) + 'h' + timeval + agg_level
                     
-                    mapper.load_agg_layer(yyyymmdd, timerange, layername)
+                    mapper.load_agg_layer(year, month, hour1, hour2, layername)
                     mapper.update_canvas(iface = iface)
                     update_values = {'agg_period': _get_agg_period(agg_level, year, month),
                                      'period_name': periodname,
