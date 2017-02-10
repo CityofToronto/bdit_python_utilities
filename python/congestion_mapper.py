@@ -78,11 +78,11 @@ class CongestionMapper( IteratingMapper ):
         if starttime > endtime:
             raise ValueError('start time {starttime} after end time {endtime}'.format(starttime=starttime, endtime=endtime))
         
-        sql = '''(SELECT (congestion.map_metrics('{agg_lvl}', '{agg_period}'::DATE, '{starttime}'::TIME,
+        sql = '''(SELECT (congestion.map_metric('{agg_lvl}', '{agg_period}'::DATE, '{starttime}'::TIME,
          '{endtime}'::TIME, '{metric}', '{metric_name}')).* )''' 
         sql = sql.format(agg_lvl=self.agg_level,
                          starttime=starttime, 
-                         endtime=endtime
+                         endtime=endtime,
                          agg_period=get_yyyymmdd(year, month),
                          metric=self.metric['sql_acronym'],
                          metric_name=self.metric['metric_name'])
