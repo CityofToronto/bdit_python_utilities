@@ -7,6 +7,12 @@ Grabs Top 50 Worst Segments in a format appropriate for mapping in QGIS
 CREATE OR REPLACE FUNCTION congestion.map_metric(agg_lvl varchar(9), agg_period DATE, starttime TIME, endtime TIME, metric TEXT, metric_name TEXT)
 RETURNS SETOF congestion.map_metrics
 AS $$
+/* Example
+SELECT (congestion.map_metric('year', '2015-01-01'::DATE, '08:00'::TIME,
+         '09:00'::TIME, 'bti', 'Buffer Time Index')).* ;
+ Returns 50 least reliable streets in the AM peak for the year of 2015
+*/
+
 BEGIN 
 
 	/*Value checks on inputs*/
@@ -28,9 +34,15 @@ BEGIN
 		 JOIN gis.inrix_tmc_tor USING (tmc)
 		 JOIN gis.tmc_from_to_lookup USING (tmc)
 		 WHERE inrix_tmc_tor.sum_miles > 0.124274 AND aggregation_levels.agg_level = %L
+		 AND COALESCE(road_type,'') NOT LIKE 'HWY'
 		 AND metrics.timeperiod = timerange(%L::time, %L::time) AND metrics.agg_period = %L::DATE
 		 ORDER BY metrics.%I DESC LIMIT 50 
 		 $x$, metric, metric, metric_name, agg_lvl, starttime, endtime, agg_period, metric);
+
+
 END;
 $$
-LANGUAGE plpgsql;
+LANGUAGE plpgsql STABLE
+  COST 100
+  ROWS 50;
+
