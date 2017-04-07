@@ -1,13 +1,13 @@
-#Walkthrough Congestion Metrics from Access Database: TMC C09-04848
+# Walkthrough Congestion Metrics from Access Database: TMC C09-04848
 
 Apologies for how ugly this is, but in any case here's a rundown. I am going to trace the calculations through foor TMC C09-04848 (Lake Shore Blvd WB, Yonge St - York St)
 
-##Step 1A: Average Speed by Month
+## Step 1A: Average Speed by Month
 Constraints:
 
 - Weekday (Monday-Friday)
 - 17:00 - 18:00
-- Arterials only (INRIX_speed85.type<3, INRIX_speed85.HwyArt=2)
+- Arterials only (`INRIX_speed85.type<3`, `INRIX_speed85.HwyArt=2`)
 
 ```SQL
 SELECT DAY_MONTH.Month, DAY_MONTH.tmc, [Miles]*1.60934 AS Length, [speed85]/Avg([speed_wtd]) AS TTI, Avg(DAY_MONTH.speed_wtd) AS AvgOfspeed_wtd, Sum(DAY_MONTH.Count) AS SumOfcount, Avg(DAY_MONTH.speed) AS AvgOfspeed, INRIX_speed85.speed85, INRIX_speed85.nightspeed INTO [Average Speed TTI Monthly AM]
@@ -34,12 +34,12 @@ Output:
 | 11    | 0.361915879 | 5.493105969 | 9.029499936    | 1009       | 8.980000091 | 49.6    | 34         | 
 | 12    | 0.361915879 | 3.572457526 | 13.88399992    | 963        | 14.03099992 | 49.6    | 34         | 
 
-##Step 1B: Average Speed by Quarter
+## Step 1B: Average Speed by Quarter
 Constraints:
 
 - Weekday (Monday-Friday)
 - 17:00 - 18:00
-- Arterials only (INRIX_speed85.type<3, INRIX_speed85.HwyArt=2)
+- Arterials only (`INRIX_speed85.type<3`, `INRIX_speed85.HwyArt=2`)
 
 ```SQL
 SELECT [Lookup_Month Quarter].Quarter, DAY_MONTH.tmc, [Miles]*1.60934 AS Length, [speed85]/Avg([speed_wtd]) AS TTI, Avg(DAY_MONTH.speed_wtd) AS AvgOfspeed_wtd, Sum(DAY_MONTH.Count) AS SumOfcount, Avg(DAY_MONTH.speed) AS AvgOfspeed, INRIX_speed85.speed85, INRIX_speed85.nightspeed INTO [Average Speed TTI Quarterly AM]
@@ -56,12 +56,12 @@ ORDER BY [speed85]/Avg([speed_wtd]) DESC;
 | 3       | 0.361915879 | 4.361717712 | 11.37166669    | 3310       | 11.51566668 | 49.6    | 34         | 
 | 4       | 0.361915879 | 4.469005308 | 11.09866661    | 3136       | 11.18666668 | 49.6    | 34         | 
 
-##Step 1C: Average Speed by Year
+## Step 1C: Average Speed by Year
 Constraints:
 
 - Weekday (Monday-Friday)
 - 17:00 - 18:00
-- Arterials only (INRIX_speed85.type<3, INRIX_speed85.HwyArt=2)
+- Arterials only (`INRIX_speed85.type<3`, `INRIX_speed85.HwyArt=2`)
 
 ```SQL
 SELECT DAY_MONTH.tmc, [Miles]*1.60934 AS Length, [speed85]/Avg([speed_wtd]) AS TTI, Avg(DAY_MONTH.speed_wtd) AS AvgOfspeed_wtd, Sum(DAY_MONTH.Count) AS SumOfcount, Avg(DAY_MONTH.speed) AS AvgOfspeed, INRIX_speed85.speed85, INRIX_speed85.nightspeed INTO [Average Speed TTI Annual AM]
