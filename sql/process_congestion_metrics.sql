@@ -1,4 +1,4 @@
-/*
+﻿/*
 Author: Raphael Dumas
 Inputs: aggregation level, from month, to month
 Processes aggregate Inrix data into Travel Time Index and Buffer Time Index over the specified period and using the specified aggregation level. The aggregation level is used in the date_trunc() function in order to do a GROUP BY the dates truncated to that particular period. 
@@ -31,7 +31,7 @@ BEGIN
 		) as timeperiod, --Transform time15 into hour range
 	 agg_id, 
 	 date_trunc(agg_lvl, dt) as period,	  --Truncates the date to a given period based on the specified aggregation level
-	 AVG(GREATEST( ITT.speed_overnight/AEH.avg_speed,1.0)) AS tti,
+	 AVG(GREATEST( ITT.speed_85/AEH.avg_speed,1.0)) AS tti,
 	 percentile_cont(0.5) WITHIN GROUP (ORDER BY avg_speed)/(percentile_cont(0.05) WITHIN GROUP (ORDER BY avg_speed)) - 1 as bti -- (T95-T50)/T50 = s_50/s_05 - 1 
 	 
 	 FROM inrix.agg_extract_hour AEH
@@ -71,7 +71,7 @@ BEGIN
 	 timeperiod, --Transform time15 into hour range
 	 agg_id, 
 	 date_trunc(agg_lvl, dt) as period,	  --Truncates the date to a given period based on the specified aggregation level
-	 AVG(GREATEST( ITT.speed_overnight/AEH.avg_speed,1.0)) AS tti,
+	 AVG(GREATEST( ITT.speed_85/AEH.avg_speed,1.0)) AS tti,
 	 percentile_cont(0.5) WITHIN GROUP (ORDER BY avg_speed)/(percentile_cont(0.05) WITHIN GROUP (ORDER BY avg_speed)) - 1 as bti -- (T95-T50)/T50 = s_50/s_05 - 1 
 	 
 	 FROM inrix.agg_extract_hour AEH
