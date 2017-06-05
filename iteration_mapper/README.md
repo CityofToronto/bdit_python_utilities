@@ -1,65 +1,43 @@
-# Congestion Mapping 
-*Automating the creation of maps of congestion and reliability metrics for different time periods and time aggregations (year, quarter, month)*
+# Iteration Mapping 
+*Automating the creation of maps of metrics from a PostgreSQL database by iterating over different metrics or timeperiods*
 
 ## Purpose
 Automate the generation of maps in QGIS so that looking at multiple metrics over time doesn't require a lot of manual layer creation and composer editing.
 
-You can follow progress at [this Github milestone](https://github.com/CityofToronto/bdit_congestion/milestone/1).
-
 ## Usage
 
 ### Setup
-1. Run the files in the [`sql` folder](#sql) to set up the congestion schema.
-2. Process congestion metrics in the database using the `process_congestion_metrics` SQL function
+1. Create a PostgreSQL table of the metrics to map. [Congestion Mapper](https://github.com/CityofToronto/bdit_congestion/tree/master/congestion_mapping) assumes different metrics are in the same table, and each layer is a different filter on one single table.
 3. The Python element requires a working [QGIS installation](http://www.qgis.org/en/site/forusers/download.html)
 4. If wanting to work on the script outside of QGIS, set up a Python virtual environment for developing with QGIS based on [these instructions](http://gis.stackexchange.com/a/223325/36886).
+5. Create your own subclass of `IteratingMapper` tailored to the metrics and timeperiods you want to be iterating over. You can have a look at [Congestion Mapper](https://github.com/CityofToronto/bdit_congestion/tree/master/congestion_mapping) as an example.
 
-### The `congestion` schema
+#### In QGIS 
+1. Set up a new QGIS project with background layers properly styled. Note these layernames and to add them to the `BACKGROUND_LAYERNAMES` list.
+2. Load a sample layer of data and style it. Save the style to a style file.
+3. Set up the print composer.
+4. When adding labels to the print composer, note their ids to add to the `COMPOSER_LABELS` dictionary.
 
-The main table in this schema is `metrics` which has the following schema  
+   ![](img/composer_items.PNG)
+5. Save the print composer as a template with `Composer > Save as Template...`
 
-|column|type|explanation|
-|------|----|-----------|
-|tmc|character(9)| tmc id |
-|timeperiod|public.timerange| time of day range that metrics are aggregated over|
-|agg_id|smallint| FK to `aggregation_levels` for the aggregation level|
-|agg_period|date| starting date of the aggregation period |
-|tti|real| Travel Time Index |
-|bti|real| Buffer Time Index|
+#### In Python 
+`IterationMapper` is the base class for iterating maps in QGIS. For new mapping tasks this baseclass should be inherited in the spirit of `CongestionMapper`. `BACKGROUND_LAYERNAMES` and `COMPOSER_LABELS` should be modified for the new composition, noting the elements from the QGIS project and print composer template as per above. `COMPOSER_LABELS` is a dictionary that takes the following form, where each id in the print composer is a key, and the string to be formatted is its corresponding value. In the string to be formatted, insert placeholder variables in curly braces `{agg_period}` where these elements of the string will be generated when automating. Have a look at [Using % and .format() for great good!](https://pyformat.info/)
 
-Currently aggregation levels are one of year, quarter, or month, the dates over which the (weekday) data is aggregated.
-
-Rows are inserted into `congestion.metrics` by calling the `congestion.process_metrics()` function (see below).
-
-#### Processing Congestion Metrics
-This function can be called with either of the two following sets of parameters:
-
- - Hourly aggregation
-   agg_lvl varchar(9), from_mon DATE, to_mon DATE
- - Custom timeperiod 
-   agg_lvl varchar(9), from_mon DATE, to_mon DATE, timeperiod timerange
-
-`agg_lvl` is matched to a specified aggregation level in `congestion.aggregation_levels`. These are keywords to the [`date_trunc`](https://www.postgresql.org/docs/9.6/static/functions-datetime.html#FUNCTIONS-DATETIME-TRUNC) function, which is how the metrics get aggregated over an aggregation period. Aggregation levels must therefore be an acceptable parameter to the [`date_trunc`](https://www.postgresql.org/docs/9.6/static/functions-datetime.html#FUNCTIONS-DATETIME-TRUNC) function. 
-
-`rom_mon` must be before `to_mon` and both must have a day = 1. There are no sanity checks on whether the days spanned by `from_mon-to_mon` is actually greater than the specified aggregation level so make sure to check the dates used in the function calls
-
-If the optional parameter `timeperiod` is not specified, the function will aggregate each hour of the day individually. Otherwise it will aggregate only over the specified timerange.
-
-Examples:
-```sql
-SELECT congestion.process_metrics('year', '2012-01-01'::DATE, '2015-01-01'::DATE)
+```python
+COMPOSER_LABELS = {'map_title': '{agg_period} Top 50 {metric_attr} Road Segments'}
 ```
-Will produce an annual aggregation of each metric for each hour for 2012, 2013, and 2014
 
-```sql
-SELECT congestion.process_metrics('quarter', '2014-01-01'::DATE, '2015-01-01'::DATE, timerange('07:30'::TIME, '09:00::TIME))
-```
-Will produce a quarterly aggregation of each metric in 2014 during this version of the AM peak. 
+A new method to generate layers from SQL like `CongestionMapper.load_agg_layer()` would need to be written, which prepares custom SQL and then assigns it to the URI with `self.uri.setDataSource("", sql, "geom", "", "Rank")` before calling `IterationMapper.load_layer()`. 
 
-### Using the Python application
+The methods in `parsing_utils.py` are (mostly) specific to processing inputs related to congestion mapping, and the `parse_args()` method could be modified to process command-line inputs for different applications. There may be a way to have a generalizable argument parser that could be subclassed for future applications.
+
+`map_metric.py` only contains code to set up the `CongestionMapper` from either command-line or scripted input, and then loop over metrics, years and months to call layer loading methods, updating labels, and finally printing. 
+
+## Using the Python application
 The script is designed for use as a standalone command-line application as well as a script that can be opened within QGIS.
 
-#### In the QGIS Python Console
+### In the QGIS Python Console
 *Only tested in QGIS LTR versions `2.14.8` and above*
 
 1. Open the congestion QGIS project to automate.
@@ -111,34 +89,12 @@ The script is designed for use as a standalone command-line application as well 
 
 ## Contents
 
-### sql
-This folder contains `sql` scripts to create the `congestion` schema ([`new_tables.sql`](sql/new_tables.sql)) including the creation of a custom `timerange` type to contain timeperiods. From there [`aggregation_levels`](sql/aggregation_levels.sql) inserts aggregation levels into that table. [`process_congestion_metrics.sql`](sql/process_congestion_metrics.sql) creates functions for aggregating the congestion metrics (bti, tti) from the `inrix.agg_extract_hour` table and inserting them into `congestion.metrics`.
-
-#### congestion.process_metrics()
-There are two function that can be called depending on the following sets of parameters:
-
- - Hourly aggregation
-   agg_lvl varchar(9), from_mon DATE, to_mon DATE
- - Custom timeperiod 
-   agg_lvl varchar(9), from_mon DATE, to_mon DATE, timeperiod timerange
-
-`agg_lvl` is matched to a specified aggregation level in `congestion.aggregation_levels`. These are keywords to the [`date_trunc`](https://www.postgresql.org/docs/9.6/static/functions-datetime.html#FUNCTIONS-DATETIME-TRUNC) function, which is how the metrics get aggregated over an aggregation period. Aggregation levels must therefore be an acceptable parameter to the [`date_trunc`](https://www.postgresql.org/docs/9.6/static/functions-datetime.html#FUNCTIONS-DATETIME-TRUNC) function. 
-
-There are only two sanity checks on `from_mon` and `to_mon`: 
-1. Whether `from_mon` is before `to_mon`
-2. That both have a day = 1
-
-There are no sanity checks on whether the days spanned by `from_mon-to_mon` is actually greater than the specified aggregation level so the following is possible `SELECT congestion.process_metrics('year', '2015-01-01'::DATE, '2015-08-01'::DATE)`, which would aggregate those 7 months as a 'year'.
-
-If the optional parameter `timeperiod` is not specified, the function will aggregate each hour of the day individually. Otherwise it will take aggregate only over the specified timerange.
-
-### python
 This folder contains a python command-line application to iterate over a range of dates and metrics and print maps from QGIS.
 This application is currently only tested with QGIS `2.14.X`
 
-#### Contents:
+### Contents:
 
-##### iteration_mapper
+#### iteration_mapper
 
 Base object for iterating map creation with PyQGIS. 
 
@@ -158,24 +114,6 @@ Base object for iterating map creation with PyQGIS.
  - `print_map(printpath, filetype = 'png')`: Print the map to the specified location
  - `clear_layer()`: Remove added layer
  - `close_project()`: Close the project, if loaded
-
-##### congestion_mapper
-
-Inherits from `iteration_mapper`. 
-
-**Attributes:**  
- - `SQL`: base `sql` scripts for each metric type
- - `COMPOSER_LABELS`: content to change in the QGIS composer labels
- - `METRICS`: dictionary of metric attributes
- - `BACKGROUND_LABELS`: background layer names
- - `agg_level`: string representing the aggregation level
- - `metric`: dictionary of metric attributes derived from METRICS
-
-**Additional functions:**  
- - `load_agg_layer()`: loads a layer of metrics based on the specific metric, aggregation level, timeperiod, and aggregation period
- - `set_metric()`: Set the metric for mapping based on the provided key
- - `update_table()`: Update the table in the composition to use current metric layer
-
 
 ##### parsing_utils
 
@@ -232,29 +170,3 @@ While working on this project at some point PyLint threw a warning because too m
 
 This tied into another consideration: **Given that there are going to be more/other maps to automate, how do we make this project flexible/extensible to other tasks?** Is there a way to store and group variables and methods that are generalizable to other iterative mapping tasks into an object that can then be inherited for more specific tasks? **Yes.** This is the `IterationMapper` class, which is inherited by the `CongestionMapper` class. 
 
-## Next Steps and How to Contribute
-This project is currently a work in progress. Have a look at the [project kanban board](https://github.com/CityofToronto/bdit_congestion/projects/1) and the [opened issues in the milestone](https://github.com/CityofToronto/bdit_congestion/milestone/1)
-
-### How to extend
-
-#### In QGIS 
-1. Set up a new QGIS project with background layers properly styled. Note these layernames and to add them to the `BACKGROUND_LAYERNAMES` list.
-2. Load a sample layer of data and style it. Save the style to a style file.
-3. Set up the print composer.
-4. When adding labels to the print composer, note their ids to add to the `COMPOSER_LABELS` dictionary.
-
-   ![](img/composer_items.PNG)
-5. Save the print composer as a template with `Composer > Save as Template...`
-
-#### In Python 
-`IterationMapper` is the base class for iterating maps in QGIS. For new mapping tasks this baseclass should be inherited in the spirit of `CongestionMapper`. `BACKGROUND_LAYERNAMES` and `COMPOSER_LABELS` should be modified for the new composition, noting the elements from the QGIS project and print composer template as per above. `COMPOSER_LABELS` is a dictionary that takes the following form, where each id in the print composer is a key, and the string to be formatted is its corresponding value. In the string to be formatted, insert placeholder variables in curly braces `{agg_period}` where these elements of the string will be generated when automating. Have a look at [Using % and .format() for great good!](https://pyformat.info/)
-
-```python
-COMPOSER_LABELS = {'map_title': '{agg_period} Top 50 {metric_attr} Road Segments'}
-```
-
-A new method to generate layers from SQL like `CongestionMapper.load_agg_layer()` would need to be written, which prepares custom SQL and then assigns it to the URI with `self.uri.setDataSource("", sql, "geom", "", "Rank")` before calling `IterationMapper.load_layer()`. 
-
-The methods in `parsing_utils.py` are (mostly) specific to processing inputs related to congestion mapping, and the `parse_args()` method could be modified to process command-line inputs for different applications. There may be a way to have a generalizable argument parser that could be subclassed for future applications.
-
-`map_metric.py` only contains code to set up the `CongestionMapper` from either command-line or scripted input, and then loop over metrics, years and months to call layer loading methods, updating labels, and finally printing. 
