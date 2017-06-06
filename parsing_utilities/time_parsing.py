@@ -24,7 +24,7 @@ def fullmatch(regex, string, flags=0):
     source: http://stackoverflow.com/a/30212799/4047679"""
     return re.match("(?:" + regex + r")\Z", string, flags=flags)
 
-def get_yyyymmdd(yyyy: int, mm: int, **kwargs) -> str:
+def get_yyyymmdd(yyyy, mm, **kwargs):
     """Combine integer yyyy and mm into a string date yyyy-mm-dd."""
     
     if 'dd' not in kwargs:
@@ -39,11 +39,11 @@ def get_yyyymmdd(yyyy: int, mm: int, **kwargs) -> str:
     else:
         return str(yyyy)+'-'+str(mm)+'-'+dd
 
-def _format_hour_ampm(hr: time) -> str:
+def _format_hour_ampm(hr):
     """Return a string hour with no leading zero and AM/PM"""
     return '{:d} {}'.format(int(hr.strftime("%I")), hr.strftime("%p"))
 
-def format_fromto_hr(hour1: int, hour2: int) -> str:
+def format_fromto_hr(hour1, hour2):
     """Format hour1-hour2 as a string and append AM/PM"""
     from_to_hour = '{from_hour}-{to_hour}'
     hr1 = time(hour1)
@@ -60,8 +60,7 @@ def format_fromto_hr(hour1: int, hour2: int) -> str:
             from_hour = str(int(hr1.strftime("%I")))
     return from_to_hour.format(from_hour=from_hour, to_hour=to_hour)
 
-def _validate_yyyymm_range(yyyymmrange,
-                           agg_level: str) -> dict:
+def _validate_yyyymm_range(yyyymmrange, agg_level):
     """Validate the two yyyymm command line arguments provided
 
     Args:
@@ -132,8 +131,7 @@ def _validate_yyyymm_range(yyyymmrange,
     
     return years
 
-def validate_multiple_yyyymm_range(years_list, 
-                                   agg_level: str) -> dict:
+def validate_multiple_yyyymm_range(years_list, agg_level):
     """Validate a list of pairs of yearmonth strings
     
     Takes one or more lists like ['YYYYMM','YYYYMM'] and passes them to 
@@ -165,7 +163,7 @@ def validate_multiple_yyyymm_range(years_list,
                                                    set(years[year_to_add]))
     return years
 
-def get_timerange(time1: int, time2: int) -> str:
+def get_timerange(time1, time2):
     """Validate provided times and create a timerange string to be inserted into PostgreSQL
     
     Args:
