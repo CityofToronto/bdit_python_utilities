@@ -21,7 +21,7 @@ class IteratingMapper( object ):
     BACKGROUND_LAYERNAMES = []
     COMPOSER_LABELS = {}
     
-    def __init__(self, logger, dbsettings, stylepath, templatepath, sql_string, *args, gid=None, **kwargs):
+    def __init__(self, logger, dbsettings, stylepath, templatepath, sql_string, *args, **kwargs):
         """Initiate IteratingMapper with logger, dbsettings, stylepath, templatepath"""
         self.logger = logger
         self.uri = self._new_uri(dbsettings)
@@ -35,10 +35,10 @@ class IteratingMapper( object ):
             templateContent = templateFile.read()
             self.template.setContent(templateContent)
         
-        if gid is None:
-            self.gid = 'gid'
+        if kwargs.get('gid', False):
+            self.gid = kwargs.pop('gid')
         else:
-            self.gid = gid
+            self.gid = 'gid'
         
         self.project = None
         if kwargs.get('projectfile', False):
