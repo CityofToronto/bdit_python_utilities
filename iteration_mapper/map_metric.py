@@ -68,14 +68,9 @@ if __name__ == '__console__':
         sql_params = {'year':year}
         mapper.load_sql_layer(layername, sql_params)
         mapper.update_canvas(iface = iface)
-        update_values = {'agg_period': _get_agg_period(agg_level, year, month),
-                         'period_name': periodname,
-                         'from_to_hours': format_fromto_hr(hour1, hour2), 
-                         'stat_description': mapper.metric['stat_description'],
-                         'metric_attr': mapper.metric['metric_attr']
-                        }
+        update_values = {'year': year}
         #TODO Fix this hack
-        mapper.update_labels(labels_dict = CongestionMapper.COMPOSER_LABELS, labels_update = update_values)
+        mapper.update_labels(labels_dict = IterationMapper.COMPOSER_LABELS, labels_update = update_values)
 
         mapper.update_table()
         mapper.print_map(print_directory + layername + '.png' )
