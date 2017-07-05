@@ -93,9 +93,13 @@ class IteratingMapper( object ):
         if console:
             composerView = iface.createNewComposer()
             composerView.composition().loadFromTemplate(template)
+            
             composition = composerView.composition()
             mapSettings = composition.mapSettings()
         else:
+            raise NotImplementedError("_load_print_composer() not ready to "\
+                                      "run from outside QGIS, console must "\
+                                      "be True")
             #canvas = QgsMapCanvas()
             # Next three lines from http://kartoza.com/en/blog/how-to-create-a-qgis-pdf-report-with-a-few-lines-of-python/
             #bridge = QgsLayerTreeMapCanvasBridge(
@@ -153,7 +157,7 @@ class IteratingMapper( object ):
             None"""
         if labels_dict is None:
             labels_dict = type(self).COMPOSER_LABELS
-        self.logger.info("Updating labels %s", labels_dict)
+        self.logger.debug("Updating labels %s", labels_dict)
         for label_id, label_text in labels_dict.items():
             self.composition.getComposerItemById(label_id).setText(label_text.format(**labels_update))
     
@@ -176,11 +180,14 @@ class IteratingMapper( object ):
             NotImplementedError: If filetype is not supported
         """
         
+        self.logger.info('Refreshing items in composition')
         self.composition.refreshItems()
         if filetype == 'png':
+            self.logger.info('Printing png to %s', printpath)
             image = self.composition.printPageAsRaster(0)
             image.save(printpath)
         elif filetype == 'pdf':
+            self.logger.info('Printing pdf to %s', printpath)
             self.composition.exportAsPDF(printpath)
         else:
             raise NotImplementError('{filetype} is not supported'.format(filetype=filetype))
