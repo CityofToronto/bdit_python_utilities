@@ -21,10 +21,12 @@ class IteratingMapper( object ):
     BACKGROUND_LAYERNAMES = []
     COMPOSER_LABELS = {}
     
-    def __init__(self, logger, dbsettings, stylepath, templatepath, *args, **kwargs):
+    def __init__(self, logger, dbsettings, stylepath, templatepath, sql_string, *args, gid=None, **kwargs):
         """Initiate IteratingMapper with logger, dbsettings, stylepath, templatepath"""
         self.logger = logger
         self.uri = self._new_uri(dbsettings)
+        
+        self.sql_string = sql_string
         
         self.logger.info('Loading template')
         self.stylepath = stylepath
@@ -32,6 +34,11 @@ class IteratingMapper( object ):
         with open(templatepath, 'r') as templateFile:
             templateContent = templateFile.read()
             self.template.setContent(templateContent)
+        
+        if gid is None:
+            self.gid = 'gid'
+        else:
+            self.gid = gid
         
         self.project = None
         if kwargs.get('projectfile', False):
@@ -111,16 +118,21 @@ class IteratingMapper( object ):
         layerslist = [QgsMapCanvasLayer(layer) for layer in layers]
         return layerslist
     
-    def load_layer(self, layer_name, provider_name):
+    def load_sql_layer(self, layer_name, sql_params):
         """Load a vector layer based on the object's URI with layer_name, and provider_name
         
         Args:
             layer_name : name for the layer
-            provider_name: name of the provider
+            sql_params: dictionary of parameters to be passed 
+                to a string formatting function on 
+                self.sql_string
         Returns:
             self
         """
-        self.layer = QgsVectorLayer(self.uri.uri(False), layer_name, provider_name)
+        sql = self.sql_string.format(**sql_params)
+        # setDataSource(schema, 'tablename', geom column, WHERE clause, gid)
+        self.uri.setDataSource("", sql, "geom", "", self.gid)
+        self.layer = QgsVectorLayer(self.uri.uri(False), layer_name, 'postgres')
         self.map_registry.addMapLayer(self.layer)
         self.layer.loadNamedStyle(self.stylepath)
         return self
