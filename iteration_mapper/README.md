@@ -7,6 +7,7 @@ Automate the generation of maps in QGIS so that looking at multiple metrics over
 ## Usage
 
 ### Setup
+1. In order to have this module available to the QGIS version of Python, you'll have to do a bit more than the [instructions at the root of this repository](../README.md#add-this-repository-to-your-python-scripts). In the QGIS console run the following commands: `import site`, `print site.USER_SITE`.  Then create the folder structure printed above, something like: `C:\Users\YOURUSERNAME\AppData\Roaming\Python\Python27\site-packages` (up to `Roaming` should already exist). Put the same `.pth` file into this new `site-packages` folder. Once you restart QGIS, `import iteration_mapper` should work.
 1. Create a PostgreSQL table of the metrics to map. [Congestion Mapper](https://github.com/CityofToronto/bdit_congestion/tree/master/congestion_mapping) assumes different metrics are in the same table, and each layer is a different filter on one single table.
 3. The Python element requires a working [QGIS installation](http://www.qgis.org/en/site/forusers/download.html)
 4. If wanting to work on the script outside of QGIS, set up a Python virtual environment for developing with QGIS based on [these instructions](http://gis.stackexchange.com/a/223325/36886).
