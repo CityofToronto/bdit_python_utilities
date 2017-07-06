@@ -15,12 +15,13 @@ Automate the generation of maps in QGIS so that looking at multiple metrics over
 
 #### In QGIS 
 1. Set up a new QGIS project with background layers properly styled. Note these layernames and to add them to the `BACKGROUND_LAYERNAMES` list.
-2. Load a sample layer of data and style it. Save the style to a style file.
+2. Load a sample layer of data and style it. Save the style to a style file. Note that columns must have the same names in any new layer this style is applied to for the style to be properly displayed. 
 3. Set up the print composer.
 4. When adding labels to the print composer, note their ids to add to the `COMPOSER_LABELS` dictionary.
 
    ![](img/composer_items.PNG)
 5. Save the print composer as a template with `Composer > Save as Template...`
+6. Open the template in a new QGIS session to ensure the format is correct
 
 #### In Python 
 `IterationMapper` is the base class for iterating maps in QGIS. For new mapping tasks this baseclass should be inherited in the spirit of `CongestionMapper`. `BACKGROUND_LAYERNAMES` and `COMPOSER_LABELS` should be modified for the new composition, noting the elements from the QGIS project and print composer template as per above. `COMPOSER_LABELS` is a dictionary that takes the following form, where each id in the print composer is a key, and the string to be formatted is its corresponding value. In the string to be formatted, insert placeholder variables in curly braces `{agg_period}` where these elements of the string will be generated when automating. Have a look at [Using % and .format() for great good!](https://pyformat.info/)
