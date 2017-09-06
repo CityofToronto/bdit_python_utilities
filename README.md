@@ -10,9 +10,9 @@ In the terminal run:
 
 This should ouput the contents of `sys.path`, amongst others. You're looking for an entry that ends with `site-packages`. Navigate to that folder.
 
-Create a text file called `python_utilities.pth`. And inside it add:
+Create a text file called `python_utilities.pth` inside the `site-packages` folder. And inside it add:
 ```
-C:\path\to\this\repository\
+C:\path\to\the\bdit_python_utilities\repository\
 ```
 
 Python will look into folders listed in any `.pth` file in `site-packages` for modules to import.
