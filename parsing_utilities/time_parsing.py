@@ -5,7 +5,7 @@ Public Functions:
         Emulate python-3.4 re.fullmatch().
     
     get_yyyymmdd(yyyy, mm, **kwargs):
-        Combine integer yyyy and mm into a string date yyyy-mm-dd. 
+        Combine integer yyyy and mm into a string date yyyy-mm-dd.
     
     format_fromto_hr(hour1, hour2):
         Format hour1-hour2 as a string and append AM/PM
@@ -17,7 +17,9 @@ Public Functions:
         Validate provided times and create a timerange string to be inserted into PostgreSQL
 """
 import re
-from datetime import time
+from datetime import time, datetime
+import calendar
+from collections import defaultdict
 
 def fullmatch(regex, string, flags=0):
     """Emulate python-3.4 re.fullmatch().
@@ -28,7 +30,7 @@ def get_yyyymmdd(yyyy, mm, **kwargs):
     """Combine integer yyyy and mm into a string date yyyy-mm-dd."""
     
     if 'dd' not in kwargs:
-        dd = '01'    
+        dd = '01'
     elif kwargs['dd'] >= 10:
         dd = str(kwargs['dd'])
     elif kwargs['dd'] < 10:
@@ -36,8 +38,7 @@ def get_yyyymmdd(yyyy, mm, **kwargs):
             
     if mm < 10:
         return str(yyyy)+'-0'+str(mm)+'-'+dd
-    else:
-        return str(yyyy)+'-'+str(mm)+'-'+dd
+    return str(yyyy)+'-'+str(mm)+'-'+dd
 
 def _format_hour_ampm(hr):
     """Return a string hour with no leading zero and AM/PM"""
@@ -51,11 +52,11 @@ def format_fromto_hr(hour1, hour2):
     
     if hour2 == 24:
         to_hour = '12 AM'
-        from_hour =  _format_hour_ampm(hr1)
+        from_hour = _format_hour_ampm(hr1)
     else:
         to_hour = _format_hour_ampm(time(hour2))
         if hour1 < 12 and hour2 >= 12:
-            from_hour =  _format_hour_ampm(hr1)
+            from_hour = _format_hour_ampm(hr1)
         else:
             from_hour = str(int(hr1.strftime("%I")))
     return from_to_hour.format(from_hour=from_hour, to_hour=to_hour)
@@ -65,7 +66,7 @@ def _validate_yyyymm_range(yyyymmrange, agg_level):
 
     Args:
         yyyymmrange: List containing a start and end year-month in yyyymm format
-        agg_level: the aggregation level, determines number of months each 
+        agg_level: the aggregation level, determines number of months each
             period spans
     
     Returns:
@@ -75,8 +76,6 @@ def _validate_yyyymm_range(yyyymmrange, agg_level):
         ValueError: If the values entered are incorrect
     """
 
-    #if agg_level not in SQLS:
-    #    raise ValueError('Aggregation level: {agg_level} not implemented'.format(agg_level=agg_level))
     if agg_level == 'month':
         step = 1
     elif agg_level == 'quarter':
@@ -115,8 +114,8 @@ def _validate_yyyymm_range(yyyymmrange, agg_level):
         else:
             for year in range(yyyy[0], yyyy[1]+1):
                 years[year] = [1]
-    else: 
-        #Iterate over years and months with specified aggregation step 
+    else:
+        #Iterate over years and months with specified aggregation step
         #(month or quarter)
         if yyyy[0] == yyyy[1]:
             years[yyyy[0]] = range(mm[0], mm[1]+1, step)
@@ -134,13 +133,13 @@ def _validate_yyyymm_range(yyyymmrange, agg_level):
 def validate_multiple_yyyymm_range(years_list, agg_level):
     """Validate a list of pairs of yearmonth strings
     
-    Takes one or more lists like ['YYYYMM','YYYYMM'] and passes them to 
+    Takes one or more lists like ['YYYYMM','YYYYMM'] and passes them to
     _validate_yyyymm_range then merges them back into a dictionary of
     years[YYYY] = [month1, month2, etc]
     
-    Args: 
+    Args:
         years_list: a list of lists of yyyymm strings
-        agg_level: the aggregation level, determines number of months each 
+        agg_level: the aggregation level, determines number of months each
             period spans
     
     Raises:
@@ -163,6 +162,100 @@ def validate_multiple_yyyymm_range(years_list, agg_level):
                                                    set(years[year_to_add]))
     return years
 
+def _get_date_yyyymmdd(yyyymmdd):
+    datetime_format = '%Y%m%d'
+    try:
+        date = datetime.strptime(str(yyyymmdd), datetime_format)
+    except ValueError:
+        raise ValueError('{yyyymmdd} is not a valid year-month value of format YYYYMMDD'
+                         .format(yyyymmdd=yyyymmdd))
+    return date
+
+def _validate_yyyymmdd_range(yyyymmdd_range):
+    """Validate the two yyyymm command line arguments provided
+
+    Args:
+        yyyymmdd_range: List containing a start and end year-month in yyyymm format
+    
+    Returns:
+        A nested dictionary with the processed range like {'yyyy':range(mm1,mm2+1)}
+    
+    Raises:
+        ValueError: If the values entered are incorrect
+    """
+
+    if len(yyyymmdd_range) != 2:
+        raise ValueError('{yyyymmdd_range} should contain two YYYYMMDD arguments'
+                         .format(yyyymmdd_range=yyyymmdd_range))
+    
+    
+    date1, date2 = (_get_date_yyyymmdd(date) for date in yyyymmdd_range)
+
+    if date1 > date2:
+        raise ValueError('Start date {yyyymm1} after end date {yyyymm2}'
+                         .format(yyyymm1=yyyymmdd_range[0], yyyymm2=yyyymmdd_range[1]))
+
+    years = defaultdict(dict)
+
+    #Same YYYYMM combo
+    if (date1.year == date2.year) and (date1.month == date2.month):
+        years[date1.year] = {date1.month: range(date1.day, date2.day + 1)}
+        return years
+    #Iterate over years and months
+    for year in range(date1.year, date2.year + 1):
+        if(year == date1.year) and (date1.year == date2.year):
+            month1, month2 = date1.month, date2.month
+        elif year == date1.year:
+            month1, month2 = date1.month, 12
+        elif year == date2.year:
+            month1, month2 = 1, date2.month
+        else:
+            month1, month2 = 1, 12
+        for month in range(month1, month2 + 1):
+            #Start of the YYYYMMDD range
+            if(year == date1.year) and (month == date1.month):
+                years[year][month] = range(date1.day, calendar.monthrange(year, month)[1] + 1)
+            #End of the YYYYMMDD range
+            elif(year == date2.year) and (month == date2.month):
+                years[year][month] = range(1, date2.day + 1)
+            #Full month
+            else:
+                years[year][month] = range(1, calendar.monthrange(year, month)[1] + 1)
+ 
+    return years
+
+def validate_multiple_yyyymmdd_range(years_list):
+    """Validate a list of pairs of year-month-day strings
+    
+    Takes one or more lists like ['YYYYMMDD','YYYYMMDD'] and passes them to
+    _validate_yyyymmdd_range then merges them back into a dictionary of
+    years[YYYY] = [month1, month2, etc]
+    
+    Args:
+        years_list: a list of lists of yyyymm strings
+        agg_level: the aggregation level, determines number of months each
+            period spans
+    
+    Raises:
+        ValueError: If the values entered are incorrect
+    
+    Returns:
+        a dictionary of years[YYYY] = [month1, month2, etc]
+    """
+    years = {}
+    if len(years_list) == 1:
+        years = _validate_yyyymmdd_range(years_list[0])
+    else:
+        for yearrange in years_list:
+            years_to_add = _validate_yyyymmdd_range(yearrange)
+            for year_to_add in years_to_add:
+                if year_to_add not in years:
+                    years[year_to_add] = years_to_add[year_to_add]
+                else:
+                    years[year_to_add] = set.union(set(years_to_add[year_to_add]),
+                                                   set(years[year_to_add]))
+    return years
+
 def get_timerange(time1, time2):
     """Validate provided times and create a timerange string to be inserted into PostgreSQL
     
@@ -174,7 +267,8 @@ def get_timerange(time1, time2):
         String representation creating a PostgreSQL timerange object
     """
     if time1 == time2:
-        raise ValueError('2nd time parameter {time2} must be at least 1 hour after first parameter {time1}'.format(time1=time1, time2=time2))
+        raise ValueError('2nd time parameter {time2} must be at least 1 '\
+                         'hour after first parameter {time1}'.format(time1=time1, time2=time2))
         
     starttime = time(int(time1))
     
@@ -185,7 +279,9 @@ def get_timerange(time1, time2):
         endtime = time(int(time2))
         
     if starttime > endtime:
-        raise ValueError('start time {starttime} after end time {endtime}'.format(starttime=starttime, endtime=endtime))
+        raise ValueError('start time {starttime} after'\
+                         ' end time {endtime}'.format(starttime=starttime, endtime=endtime))
     
-    return 'timerange(\'{starttime}\'::time, \'{endtime}\'::time)'.format(starttime=starttime.isoformat(),
-                                                                          endtime=endtime.isoformat())
+    return 'timerange(\'{starttime}\'::time,'\
+           ' \'{endtime}\'::time)'.format(starttime=starttime.isoformat(),
+                                          endtime=endtime.isoformat())
