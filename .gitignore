@@ -139,3 +139,4 @@ $RECYCLE.BIN/
 *.lnk
 
 .vscode/
+email_notifications/client_secret.json
