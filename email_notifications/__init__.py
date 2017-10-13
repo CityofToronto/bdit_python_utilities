@@ -1,0 +1,1 @@
+from .notify_email import send_mail

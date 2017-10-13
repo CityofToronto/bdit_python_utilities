@@ -10,7 +10,7 @@ from email.mime.text import MIMEText
 import httplib2
 from apiclient import discovery
 
-from quickstart import get_credentials
+from .quickstart import get_credentials
 
 CREDENTIALS = get_credentials()
 HTTP = CREDENTIALS.authorize(httplib2.Http())
