@@ -14,7 +14,7 @@ from .quickstart import get_credentials
 
 CREDENTIALS = get_credentials()
 HTTP = CREDENTIALS.authorize(httplib2.Http())
-SERVICE = discovery.build('gmail', 'v1', http=HTTP)
+SERVICE = discovery.build('gmail', 'v1', http=HTTP, cache_discovery=False)
 MESSAGES = SERVICE.users().messages()
 
 
