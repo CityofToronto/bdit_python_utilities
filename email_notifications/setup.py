@@ -1,10 +1,10 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='email_notifications',
     version='0.1',
     description='Simplified email module for sending plaintext emails through gmail',
-    py_modules=['notify_email'],
+    packages=find_packages(),
     install_requires=[
         'httplib2',
         'google-api-python-client',
