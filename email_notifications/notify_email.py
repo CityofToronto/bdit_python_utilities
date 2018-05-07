@@ -10,9 +10,9 @@ from email.mime.text import MIMEText
 import httplib2
 from apiclient import discovery
 
-from . import quickstart
+from quickstart import get_credentials
 
-CREDENTIALS = quickstart.get_credentials()
+CREDENTIALS = get_credentials()
 HTTP = CREDENTIALS.authorize(httplib2.Http())
 SERVICE = discovery.build('gmail', 'v1', http=HTTP, cache_discovery=False)
 MESSAGES = SERVICE.users().messages()
