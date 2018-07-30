@@ -26,19 +26,21 @@ def fullmatch(regex, string, flags=0):
     source: http://stackoverflow.com/a/30212799/4047679"""
     return re.match("(?:" + regex + r")\Z", string, flags=flags)
 
-def get_yyyymmdd(yyyy, mm, **kwargs):
-    """Combine integer yyyy and mm into a string date yyyy-mm-dd."""
+def get_yyyymmdd(yyyy, mm, dd = None, delimiter = ''):
+    """Combine integer yyyy and mm into a string date yyyymmdd.
     
-    if 'dd' not in kwargs:
+    Default delimiter is blank."""
+    
+    if dd is None:
         dd = '01'
-    elif kwargs['dd'] >= 10:
-        dd = str(kwargs['dd'])
-    elif kwargs['dd'] < 10:
-        dd = '0'+str(kwargs['dd'])
+    elif dd >= 10:
+        dd = str(dd)
+    elif dd < 10:
+        dd = '0'+str(dd)
             
     if mm < 10:
-        return str(yyyy)+'-0'+str(mm)+'-'+dd
-    return str(yyyy)+'-'+str(mm)+'-'+dd
+        mm = '0'+str(mm)
+    return str(yyyy)+delimiter+mm+delimiter+dd
 
 def _format_hour_ampm(hr):
     """Return a string hour with no leading zero and AM/PM"""
