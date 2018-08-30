@@ -15,7 +15,7 @@ CLIENT_SECRET_FILE = 'client_secret.json'
 APPLICATION_NAME = 'Gmail API Python Quickstart'
 
 
-def get_credentials(flags=None):
+def get_credentials(flags=['--noauth_local_webserver']):
     """Gets valid user credentials from storage.
 
     If nothing has been stored, or if the stored credentials are invalid,
@@ -37,7 +37,8 @@ def get_credentials(flags=None):
         flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES)
         flow.user_agent = APPLICATION_NAME
         if flags:
-            credentials = tools.run_flow(flow, store, flags)
+            parsed_flags = tools.argparser.parse_args(flags)
+            credentials = tools.run_flow(flow, store, flags=parsed_flags)
         else: # Needed only for compatibility with Python 2.6
             credentials = tools.run(flow, store)
         print('Storing credentials to ' + credential_path)
