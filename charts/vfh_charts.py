@@ -15,10 +15,13 @@ import geopandas as gpd
 import os
 import shapely
 from shapely.geometry import Point
-os.environ["PROJ_LIB"]=r"C:\Users\rliu4\AppData\Local\Continuum\anaconda3\Library\share"
+
+#shapely workaround for windows
+#os.environ["PROJ_LIB"]=r"C:\Users\rliu4\AppData\Local\Continuum\anaconda3\Library\share"
 
 
-class charts:
+class geo:
+    
     def ttc(con):
         query = '''
         
@@ -34,7 +37,30 @@ class charts:
         
         return ttc
     
-    def chloro_map(con, df, subway, lower, upper, title):
+    def island(con):
+        query = '''
+
+        SELECT geom FROM gis.neighbourhood
+        WHERE area_s_cd::integer = 77
+
+        '''
+
+        island =  gpd.GeoDataFrame.from_postgis(query, con, geom_col='geom')
+        island  = island.to_crs({'init' :'epsg:3857'})
+
+        for index, row in island.iterrows():
+            rotated = shapely.affinity.rotate(row['geom'], angle=-17, origin = Point(0, 0))
+            island.loc[index, 'geom'] = rotated
+
+        return island
+    
+class charts:
+    
+    def chloro_map(con, df, subway, lower, upper, title, **kwargs):
+        
+        island = kwargs.get('island', True)
+        #d = kwargs.get('d', None)
+        
         df.columns = ['geom', 'values']
         light = '#d9d9d9'
 
@@ -47,9 +73,13 @@ class charts:
          
         mpd = df.plot(column='values', ax=ax, vmin=lower, vmax=upper,  cmap = 'YlOrRd', edgecolor = 'w', linewidth = 0.5)
         if subway == True:
-            ttc_df = charts.ttc(con)
+            ttc_df = geo.ttc(con)
             line = ttc_df.plot( ax=ax, linewidth =4, color = 'w', alpha =0.6) # ttc subway layer
             line = ttc_df.plot( ax=ax, linewidth =2, color = 'k', alpha =0.4) # ttc subway layer
+        
+        if island == False:
+            island_grey = geo.island(con)
+            island_grey.plot(ax=ax,linewidth = 0.5,  color = light)
          
         props = dict(boxstyle='round', facecolor='w', alpha=0)
         plt.text(0.775, 0.37, title, transform=ax.transAxes, wrap = True, fontsize=7, fontname = 'Libre Franklin SemiBold',
