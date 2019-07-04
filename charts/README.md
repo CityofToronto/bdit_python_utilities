@@ -1,3 +1,5 @@
+# README
+
 ## `charts.chloro_map(con, df, lower, upper, title, **kwargs)`
 
 This function creates a chloropleth map. It returns a matplotlib `fig` and `ax` object so that the map can continued be annotated and modified. 
