@@ -15,7 +15,9 @@ import geopandas as gpd
 import os
 import shapely
 from shapely.geometry import Point
-os.environ["PROJ_LIB"]=r"C:\Users\rliu4\AppData\Local\Continuum\anaconda3\Library\share"
+
+#shapely workaround for windows machines
+#os.environ["PROJ_LIB"]=r"C:\Users\rliu4\AppData\Local\Continuum\anaconda3\Library\share" 
 
 
 class charts:
