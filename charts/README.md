@@ -33,3 +33,25 @@ island|boolean|`True`|Flag to plot the Toronto Islands as having no data. True i
 cmap|str|`YlOrRd`|String to specify colourmap for the map.
 unit|str|`None`|Specifies if a unit should be added to the legend box. The automatic placement of the unit only works if the upper or lower are whole numbers.
 nbins|int|`2`|Number of ticks in the colourmap 
+
+### `charts.line_chart(data, ymin, ymax, yinc, ylab, xlab, **kwargs)`
+
+Returns  matplotlib `fig` and `ax` object. The xaxis is not formatted by this function and requires further manipulation with matplotlib. In addition, annotation boxes must be added on manually with a something like this:
+
+```python
+fig.text(0.94, 0.96, '176,000', transform=ax.transAxes, wrap = True, fontsize=9, fontname = 'Libre Franklin',
+         verticalalignment='top', ha = 'center', bbox=props, color = purple)
+```
+
+The function defines the styling with the `props` variable, so the only manipulations needed is the positioning and the text itself.
+
+The following arguments must be passed in order for the function to run.
+
+|argument|variable type|description|
+|-----|-----|-----|
+data|Series or list|Data for the chart
+ymin|int|Lower bound for the yaxis
+ymax|int|Upper bound for the yaxis
+yinc|int|Interval for the yaxis ticks
+ylab|str|Label for the yaxis
+xlab|str|Label for the xaxis
