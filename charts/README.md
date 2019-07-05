@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # vfh_charts
 
 ## `geo.ttc(con)`
@@ -7,6 +8,9 @@ Returns a geopandas dataframe of the TTC subway network.
 ## `geo.island(con)`
 
 Returns a geopandas dataframe of the Toronto Island.
+=======
+# README
+>>>>>>> 901293dbb0c6c346e29b1e476ee64ade19bc6de9
 
 ## `charts.chloro_map(con, df, lower, upper, title, **kwargs)`
 
@@ -31,4 +35,7 @@ island|boolean|`True`|Flag to plot the Toronto Islands as having no data. True i
 cmap|str|`YlOrRd`|String to specify colourmap for the map.
 unit|str|`None`|Specifies if a unit should be added to the legend box. The automatic placement of the unit only works if the upper or lower are whole numbers.
 nbins|int|`2`|Number of ticks in the colourmap 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 901293dbb0c6c346e29b1e476ee64ade19bc6de9
