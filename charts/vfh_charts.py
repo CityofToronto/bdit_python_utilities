@@ -19,7 +19,8 @@ from shapely.geometry import Point
 #shapely workaround for windows
 #os.environ["PROJ_LIB"]=r"C:\Users\rliu4\AppData\Local\Continuum\anaconda3\Library\share"
 
-
+class colour:
+    purple = '#660159'
 class geo:
     
     def ttc(con):
@@ -130,10 +131,8 @@ class charts:
     
     def line_chart(data, ymin, ymax, yinc, ylab, xlab, **kwargs):
         
-        purple = '#660159'
-        
         fig, ax =plt.subplots()
-        ax.plot(data ,linewidth=3, color = purple)
+        ax.plot(data ,linewidth=3, color = colour.purple)
         
         plt.grid()
         ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
@@ -152,7 +151,7 @@ class charts:
         plt.xticks(fontsize=9, fontname = 'Libre Franklin')
         plt.yticks(range(ymin, ymax+yinc,yinc),fontsize=9, fontname = 'Libre Franklin')
 
-        props = dict(boxstyle='round, pad=0.4',edgecolor=purple, linewidth = 2, facecolor = 'w', alpha=1)
+        props = dict(boxstyle='round, pad=0.4',edgecolor=colour.purple, linewidth = 2, facecolor = 'w', alpha=1)
 
 
         ax.set_ylim([ymin,ymax])
