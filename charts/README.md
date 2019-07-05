@@ -1,3 +1,13 @@
+# vfh_charts
+
+## `geo.ttc(con)`
+
+Returns a geopandas dataframe of the TTC subway network.
+
+## `geo.island(con)`
+
+Returns a geopandas dataframe of the Toronto Island.
+
 ## `charts.chloro_map(con, df, lower, upper, title, **kwargs)`
 
 This function creates a chloropleth map. It returns a matplotlib `fig` and `ax` object so that the map can continued be annotated and modified. 
@@ -21,3 +31,4 @@ island|boolean|`True`|Flag to plot the Toronto Islands as having no data. True i
 cmap|str|`YlOrRd`|String to specify colourmap for the map.
 unit|str|`None`|Specifies if a unit should be added to the legend box. The automatic placement of the unit only works if the upper or lower are whole numbers.
 nbins|int|`2`|Number of ticks in the colourmap 
+

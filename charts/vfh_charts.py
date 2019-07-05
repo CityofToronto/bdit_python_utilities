@@ -7,7 +7,7 @@ Created on Tue Jul  2 17:01:30 2019
 from psycopg2 import connect
 import psycopg2.sql as pg
 import pandas.io.sql as pandasql
-import matplotlib
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import matplotlib.ticker as ticker
@@ -127,7 +127,38 @@ class charts:
             
         
         return fig, ax
+    
+    def line_chart(data, ymin, ymax, yinc, ylab, xlab, **kwargs):
         
+        purple = '#660159'
+        
+        fig, ax =plt.subplots()
+        ax.plot(data ,linewidth=3, color = purple)
+        
+        plt.grid()
+        ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+
+        ax.set_facecolor('xkcd:white')
+
+        plt.xlabel(xlab, fontsize=9, fontweight = 'bold', horizontalalignment='right', x=0, labelpad=10, 
+                   fontname = 'Libre Franklin')
+        ax.grid(color='k', linestyle='-', linewidth=0.2)
+        plt.ylabel(ylab, fontsize=9, fontweight = 'bold', horizontalalignment='right', y=1.0, 
+                   labelpad=10, fontname = 'Libre Franklin')
+        fig.set_size_inches(6.1, 4.1)
+        month_lst2 = ['Sept\n2016',  'Jan\n2017',  'May',  'Sept',
+                       'Jan\n2018', 'May',  'Sept', 
+                      'Jan\n2019','May',]
+        plt.xticks(fontsize=9, fontname = 'Libre Franklin')
+        plt.yticks(range(ymin, ymax+yinc,yinc),fontsize=9, fontname = 'Libre Franklin')
+
+        props = dict(boxstyle='round, pad=0.4',edgecolor=purple, linewidth = 2, facecolor = 'w', alpha=1)
+
+
+        ax.set_ylim([ymin,ymax])
+        fig.patch.set_facecolor('w')
+        
+        return fig, ax
         
         
 
