@@ -129,7 +129,19 @@ class charts:
         
         return fig, ax
     
-    def line_chart(data, ymin, ymax, yinc, ylab, xlab, **kwargs):
+    def line_chart(data, ylab, xlab, **kwargs):
+        
+        ymax = kwargs.get('ymax', int(data.max()))
+        ymin = kwargs.get('ymin', 0)
+        
+        delta = (ymax - ymin)/4
+        i = 0
+        while True:
+            delta /= 10
+            i += 1
+            if delta < 10:
+                break
+        yinc = kwargs.get('yinc', int(round(delta+1)*pow(10,i)))
         
         fig, ax =plt.subplots()
         ax.plot(data ,linewidth=3, color = colour.purple)
@@ -149,26 +161,37 @@ class charts:
                        'Jan\n2018', 'May',  'Sept', 
                       'Jan\n2019','May',]
         plt.xticks(fontsize=9, fontname = 'Libre Franklin')
-        plt.yticks(range(ymin, ymax+yinc,yinc),fontsize=9, fontname = 'Libre Franklin')
+        plt.yticks(range(ymin,int(4.1*yinc), yinc), fontsize =9, fontname = 'Libre Franklin')
 
         props = dict(boxstyle='round, pad=0.4',edgecolor=colour.purple, linewidth = 2, facecolor = 'w', alpha=1)
 
 
-        ax.set_ylim([ymin,ymax])
+        ax.set_ylim([ymin,int(4*yinc+ymin)])
         fig.patch.set_facecolor('w')
         
         return fig, ax
     
-    def tow_chart(data, ymin, ymax, yinc, ylab, **kwargs):
+    def tow_chart(data, ylab, **kwargs):
         
+        ymax = kwargs.get('ymax', int(data.max()))
+        ymin = kwargs.get('ymin', 0)
+        
+        delta = (ymax - ymin)/3
+        i = 0
+        while True:
+            delta /= 10
+            i += 1
+            if delta < 10:
+                break
+        yinc = kwargs.get('yinc', int(round(delta+1)*pow(10,i)))
         fig, ax =plt.subplots()
-        ax.plot(data, linewidth = 2.5, color = purple)
+        ax.plot(data, linewidth = 2.5, color = colour.purple)
 
         plt.grid()
         ax.set_facecolor('xkcd:white')
 
         plt.xlabel('Time of week', fontname = 'Libre Franklin', fontsize=9, horizontalalignment='left', x=0, labelpad=3, fontweight = 'bold')
-        ax.set_ylim([0,15000])
+        ax.set_ylim([ymin,int(3*yinc+ymin)])
 
         ax.grid(color='k', linestyle='-', linewidth=0.2)
         plt.ylabel(ylab, fontname = 'Libre Franklin', fontsize=9, horizontalalignment='right', y=1, labelpad=7, fontweight = 'bold')
@@ -176,7 +199,7 @@ class charts:
 
 
         ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-        plt.yticks(range(ymin,ymax,yinc), fontsize =9)
+        plt.yticks(range(ymin,int(3.1*yinc), yinc), fontsize =9, fontname = 'Libre Franklin')
 
         ax.set_xticks(range(0,180,12))
         ax.set_xticklabels(['0','12','0','12',
@@ -187,13 +210,14 @@ class charts:
         ax.xaxis.set_minor_formatter(ticker.FixedFormatter(['Monday','Tuesday',
                                                             'Wednesday','Thursday',
                                          'Friday','Saturday','Sunday']))
-        plt.yticks( fontname = 'Libre Franklin', fontsize=9)
         ax.tick_params(axis='x', which='minor', colors = 'k', labelsize=9, pad =14)
 
-        props = dict(boxstyle='round, pad=0.3',edgecolor=purple, linewidth = 1.5, facecolor = 'w', alpha=1)
+        props = dict(boxstyle='round, pad=0.3',edgecolor=colour.purple, linewidth = 1.5, facecolor = 'w', alpha=1)
 
         ax.set_xlim([0,167])
         plt.show()
+        print(delta)
+        return fig, ax
 
         
 
