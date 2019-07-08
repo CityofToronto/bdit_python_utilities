@@ -158,7 +158,43 @@ class charts:
         fig.patch.set_facecolor('w')
         
         return fig, ax
+    
+    def tow_chart(data, ymin, ymax, yinc, ylab, **kwargs):
         
+        fig, ax =plt.subplots()
+        ax.plot(data, linewidth = 2.5, color = purple)
+
+        plt.grid()
+        ax.set_facecolor('xkcd:white')
+
+        plt.xlabel('Time of week', fontname = 'Libre Franklin', fontsize=9, horizontalalignment='left', x=0, labelpad=3, fontweight = 'bold')
+        ax.set_ylim([0,15000])
+
+        ax.grid(color='k', linestyle='-', linewidth=0.2)
+        plt.ylabel(ylab, fontname = 'Libre Franklin', fontsize=9, horizontalalignment='right', y=1, labelpad=7, fontweight = 'bold')
+        fig.set_size_inches(6.1, 1.8)
+
+
+        ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+        plt.yticks(range(ymin,ymax,yinc), fontsize =9)
+
+        ax.set_xticks(range(0,180,12))
+        ax.set_xticklabels(['0','12','0','12',
+                                                            '0','12','0','12',
+                                         '0','12','0','12','0','12'], fontname = 'Libre Franklin', fontsize = 7, color = '#777777')
+
+        ax.xaxis.set_minor_locator(ticker.FixedLocator(list(range(12,180,24))))
+        ax.xaxis.set_minor_formatter(ticker.FixedFormatter(['Monday','Tuesday',
+                                                            'Wednesday','Thursday',
+                                         'Friday','Saturday','Sunday']))
+        plt.yticks( fontname = 'Libre Franklin', fontsize=9)
+        ax.tick_params(axis='x', which='minor', colors = 'k', labelsize=9, pad =14)
+
+        props = dict(boxstyle='round, pad=0.3',edgecolor=purple, linewidth = 1.5, facecolor = 'w', alpha=1)
+
+        ax.set_xlim([0,167])
+        plt.show()
+
         
 
 

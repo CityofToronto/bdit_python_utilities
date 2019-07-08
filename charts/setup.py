@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='vfh_charts',
+    name='rick',
     version='0.1',
     description='Standardized matplotlib charts and graphs',
     packages=find_packages(),

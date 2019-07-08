@@ -1,1 +1,1 @@
-from vfh_charts import *
+from rick import *
