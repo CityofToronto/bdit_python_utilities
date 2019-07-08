@@ -219,8 +219,4 @@ class charts:
         print(delta)
         return fig, ax
 
-        
-
-
-
-            
+    def bar_chart():
