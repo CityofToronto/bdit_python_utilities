@@ -15,12 +15,18 @@ import geopandas as gpd
 import os
 import shapely
 from shapely.geometry import Point
+import matplotlib.font_manager as font_manager
+import numpy as np
 
 #shapely workaround for windows
 #os.environ["PROJ_LIB"]=r"C:\Users\rliu4\AppData\Local\Continuum\anaconda3\Library\share"
 
+class font:
+    leg_font = font_manager.FontProperties(family='Libre Franklin',size=9)
+
 class colour:
     purple = '#660159'
+    grey = '#7f7e7e'
 class geo:
     
     def ttc(con):
@@ -116,13 +122,13 @@ class charts:
         
         if unit is not None:
             if 0 < upper < 10:
-                ax.text(0.823, 0.32, unit, transform=ax.transAxes, wrap = True, fontsize=6, fontname = 'Libre Franklin', verticalalignment='bottom', ha = 'left') 
+                ax.text(0.829, 0.32, unit, transform=ax.transAxes, wrap = True, fontsize=6, fontname = 'Libre Franklin', verticalalignment='bottom', ha = 'left') 
             elif 10 <= upper < 100:
-                ax.text(0.833, 0.32, unit, transform=ax.transAxes, wrap = True, fontsize=6, fontname = 'Libre Franklin', verticalalignment='bottom', ha = 'left')
+                ax.text(0.839, 0.32, unit, transform=ax.transAxes, wrap = True, fontsize=6, fontname = 'Libre Franklin', verticalalignment='bottom', ha = 'left')
             elif 100 <= upper < 1000:
-                ax.text(0.845, 0.32, unit, transform=ax.transAxes, wrap = True, fontsize=6, fontname = 'Libre Franklin', verticalalignment='bottom', ha = 'left')
+                ax.text(0.851, 0.32, unit, transform=ax.transAxes, wrap = True, fontsize=6, fontname = 'Libre Franklin', verticalalignment='bottom', ha = 'left')
             elif 1000 <= upper < 100000:
-                ax.text(0.856, 0.32, unit, transform=ax.transAxes, wrap = True, fontsize=6, fontname = 'Libre Franklin', verticalalignment='bottom', ha = 'left')
+                ax.text(0.862, 0.32, unit, transform=ax.transAxes, wrap = True, fontsize=6, fontname = 'Libre Franklin', verticalalignment='bottom', ha = 'left')
             else:
                 pass
             
@@ -173,8 +179,14 @@ class charts:
     
     def tow_chart(data, ylab, **kwargs):
         
-        ymax = kwargs.get('ymax', int(data.max()))
+        ymax = kwargs.get('ymax', None)
         ymin = kwargs.get('ymin', 0)
+        
+        
+        ymax_flag = True
+        if ymax == None:
+            ymax = int(data.max())
+            ymax_flag = False
         
         delta = (ymax - ymin)/3
         i = 0
@@ -184,6 +196,12 @@ class charts:
             if delta < 10:
                 break
         yinc = kwargs.get('yinc', int(round(delta+1)*pow(10,i)))
+        
+        if ymax_flag == True:
+            upper = ymax
+        else:
+            upper = int(3*yinc+ymin)
+        
         fig, ax =plt.subplots()
         ax.plot(data, linewidth = 2.5, color = colour.purple)
 
@@ -191,7 +209,7 @@ class charts:
         ax.set_facecolor('xkcd:white')
 
         plt.xlabel('Time of week', fontname = 'Libre Franklin', fontsize=9, horizontalalignment='left', x=0, labelpad=3, fontweight = 'bold')
-        ax.set_ylim([ymin,int(3*yinc+ymin)])
+        ax.set_ylim([ymin,upper])
 
         ax.grid(color='k', linestyle='-', linewidth=0.2)
         plt.ylabel(ylab, fontname = 'Libre Franklin', fontsize=9, horizontalalignment='right', y=1, labelpad=7, fontweight = 'bold')
@@ -199,7 +217,7 @@ class charts:
 
 
         ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-        plt.yticks(range(ymin,int(3.1*yinc), yinc), fontsize =9, fontname = 'Libre Franklin')
+        plt.yticks(range(ymin,upper+int(0.1*yinc), yinc), fontsize =9, fontname = 'Libre Franklin')
 
         ax.set_xticks(range(0,180,12))
         ax.set_xticklabels(['0','12','0','12',
@@ -215,8 +233,87 @@ class charts:
         props = dict(boxstyle='round, pad=0.3',edgecolor=colour.purple, linewidth = 1.5, facecolor = 'w', alpha=1)
 
         ax.set_xlim([0,167])
-        plt.show()
-        print(delta)
         return fig, ax
 
-    def bar_chart():
+    def stacked_chart(data_in, xlab, lab1, lab2, **kwargs):
+
+        data.columns = ['name', 'values1', 'values2']
+        
+        xmin = kwargs.get('xmin', 0)
+        xmax = kwargs.get('xmax', None)
+        precision = kwargs.get('precision', -1)
+        percent = kwargs.get('percent', False)
+        
+        xmax_flag = True
+        if xmax == None:
+            xmax = int(max(data[['values1', 'values2']].max()))
+            xmax_flag = False
+        
+        delta = (xmax - xmin)/4
+        i = 0
+        while True:
+            delta /= 10
+            i += 1
+            if delta < 10:
+                break
+        xinc = kwargs.get('xinc', int(round(delta+1)*pow(10,i)))
+
+        if xmax_flag == True:
+            upper = xmax
+        else:
+            upper = int(4*xinc+xmin)
+
+        data.columns = ['name', 'values1', 'values2']
+        
+        ind = np.arange(len(data))
+
+        fig, ax = plt.subplots()
+        fig.set_size_inches(6.1, len(data))
+        ax.grid(color='k', linestyle='-', linewidth=0.25)
+
+        p1 = ax.barh(ind+0.4, data['values1'], 0.4, align='center', color = colour.grey)
+        p2 = ax.barh(ind, data['values2'], 0.4, align='center', color = colour.purple)
+        ax.xaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+
+        ax.xaxis.grid(True)
+        ax.yaxis.grid(False)
+        ax.set_yticks(ind+0.4/2)
+        ax.set_xlim(0,upper)
+        ax.set_yticklabels(data['name'])
+        ax.set_xlabel(xlab,  horizontalalignment='left', x=0, labelpad=10, fontname = 'Libre Franklin', fontsize=10, fontweight = 'bold')
+
+        ax.set_facecolor('xkcd:white')
+        j=0
+        
+        if precision < 1:
+            data[['values1', 'values2']] = data[['values1', 'values2']].astype(int)
+        for i in data['values2']:
+            if i < 0.1*upper:
+                ax.annotate(str(format(round(i,precision), ',')), xy=(i-0.015*upper, j-0.05), ha = 'right', color = 'w', fontname = 'Libre Franklin', fontsize=10)
+            else:
+                ax.annotate(str(format(round(i,precision), ',')), xy=(i-0.015*upper, j-0.05), ha = 'right', color = 'w', fontname = 'Libre Franklin', fontsize=10)
+            j=j+1
+        j=0.4
+        for i in data['values1']:
+            if i < 0.1*upper:
+                ax.annotate(str(format(round(i,precision), ',')), xy=(i+0.015*upper, j-0.05), ha = 'left', color = 'k', fontname = 'Libre Franklin', fontsize=10)
+            else:
+                ax.annotate(str(format(round(i,precision), ',')), xy=(i-0.015*upper, j-0.05), ha = 'right', color = 'w', fontname = 'Libre Franklin', fontsize=10)
+            j=j+1
+
+        
+        ax.legend((p1[0], p2[0]), (lab1, lab2), loc=4, frameon=False, prop=font.leg_font)
+        plt.xticks(range(xmin,upper+int(0.1*xinc), xinc), fontname = 'Libre Franklin', fontsize =10)
+        plt.yticks( fontname = 'Libre Franklin', fontsize =10)
+        
+        if percent == True:
+            data_yoy = data
+            data_yoy['percent'] = (data['values2']-data['values1'])*100/data['values1']
+            j=0.15
+            for index, row in data_yoy.iterrows():
+                ax.annotate('+'+str(format(int(round(row['percent'],0)), ','))+'%', xy=(max(row[['values1', 'values2']]) + 0.03*upper, j), 
+                                                                                           color = 'k', fontname = 'Libre Franklin', fontsize=10)
+                j=j+1
+                
+
+        return fig, ax
