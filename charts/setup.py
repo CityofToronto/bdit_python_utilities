@@ -10,7 +10,8 @@ setup(
         'psycopg2',
         'geopandas',
         'pandas',
-        'shapely'
+        'shapely',
+        'seaborn'
     ],
     python_requires='>=3'
 )

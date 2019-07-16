@@ -14,6 +14,7 @@ import matplotlib.ticker as ticker
 import geopandas as gpd
 import os
 import shapely
+import seaborn as sns
 from shapely.geometry import Point
 import matplotlib.font_manager as font_manager
 import numpy as np
@@ -29,6 +30,8 @@ class font:
 class colour:
     purple = '#660159'
     grey = '#7f7e7e'
+    light_grey = '#777777'
+    
 class geo:
     
     def ttc(con):
@@ -67,8 +70,14 @@ class geo:
     
 class charts:
     
+    global func
+    def func():
+        sns.set(font_scale=1.5)
+        mpl.rc('font',family='Libre Franklin')
+    
     def chloro_map(con, df, lower, upper, title, **kwargs):
         
+        func()
         subway = kwargs.get('subway', False)
         island = kwargs.get('island', True)
         cmap = kwargs.get('cmap', 'YlOrRd')
@@ -139,6 +148,7 @@ class charts:
     
     def line_chart(data, ylab, xlab, **kwargs):
         
+        func()
         ymax = kwargs.get('ymax', int(data.max()))
         ymin = kwargs.get('ymin', 0)
         baseline = kwargs.get('baseline', None)
@@ -179,6 +189,7 @@ class charts:
     
     def tow_chart(data, ylab, **kwargs):
         
+        func()
         ymax = kwargs.get('ymax', None)
         ymin = kwargs.get('ymin', 0)
         
@@ -217,12 +228,12 @@ class charts:
 
 
         ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-        plt.yticks(range(ymin,upper+int(0.1*yinc), yinc), fontsize =9, fontname = font.normal
+        plt.yticks(range(ymin,upper+int(0.1*yinc), yinc), fontsize =9, fontname = font.normal)
 
         ax.set_xticks(range(0,180,12))
         ax.set_xticklabels(['0','12','0','12',
                                                             '0','12','0','12',
-                                         '0','12','0','12','0','12'], fontname = font.normal, fontsize = 7, color = '#777777')
+                                         '0','12','0','12','0','12'], fontname = font.normal, fontsize = 7, color = colour.light_grey)
 
         ax.xaxis.set_minor_locator(ticker.FixedLocator(list(range(12,180,24))))
         ax.xaxis.set_minor_formatter(ticker.FixedFormatter(['Monday','Tuesday',
@@ -236,7 +247,8 @@ class charts:
         return fig, ax
 
     def stacked_chart(data_in, xlab, lab1, lab2, **kwargs):
-
+        
+        func()
         data = data_in.copy(deep=True)
         
         data.columns = ['name', 'values1', 'values2']
@@ -320,6 +332,7 @@ class charts:
     
     def bar_chart(data_in, xlab,**kwargs):
         
+        func()
         data = data_in.copy(deep=True)
         
         data.columns = ['name', 'values1']
