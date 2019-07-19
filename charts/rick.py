@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Jul  2 17:01:30 2019
+Version 0.8.0 
 
-@author: rliu4
+
 """
 from psycopg2 import connect
 import psycopg2.sql as pg
@@ -23,18 +23,46 @@ import numpy as np
 #os.environ["PROJ_LIB"]=r"C:\Users\rliu4\AppData\Local\Continuum\anaconda3\Library\share"
 
 class font:
+    """
+    Class defining the global font variables for all functions.
+    
+    """
+    
     leg_font = font_manager.FontProperties(family='Libre Franklin',size=9)
     normal = 'Libre Franklin'
     semibold = 'Libre Franklin SemiBold'
-
+    
+    
 class colour:
+    """
+    Class defining the global colour variables for all functions.
+    
+    """
     purple = '#660159'
     grey = '#7f7e7e'
     light_grey = '#777777'
+    cmap = 'YlOrRd'
     
 class geo:
+    """
+    Class for additional gis layers needed for the cloropleth map.
+    
+    """
     
     def ttc(con):
+        """Function to return the TTC subway layer.
+        
+        Parameters
+        ------------
+        con : SQL connection object
+            Connection object needed to connect to the RDS
+        
+        Returns
+        --------
+        gdf
+            Geopandas Dataframe of the Subway Layer
+        
+        """
         query = '''
         
         SELECT * FROM gis.subway_to
@@ -50,6 +78,21 @@ class geo:
         return ttc
     
     def island(con):
+        
+        """Function to return a layer of the Toronto island. Since the island is classified in the same neighbourhood as the waterfront, in some cases its not completely accurate to show the island shares the same data as the waterfront. 
+        
+        Parameters
+        ------------
+        con : SQL connection object
+            Connection object needed to connect to the RDS
+        
+        Returns
+        --------
+        gdf
+            Geopandas Dataframe of the Toronto island.
+        
+        """
+        
         query = '''
 
         SELECT 
@@ -63,24 +106,66 @@ class geo:
         island  = island.to_crs({'init' :'epsg:3857'})
 
         for index, row in island.iterrows():
-            rotated = shapely.affinity.rotate(row['geom'], angle=-17, origin = Point(0, 0))
+            rotated = shapely.affinity.rotate(row['geom'], angle=-17, origin = Point(0, 0)) 
             island.loc[index, 'geom'] = rotated
 
         return island
     
 class charts:
+    """
+    Class defining all the charting functions.
+    
+    """
     
     global func
     def func():
-        sns.set(font_scale=1.5)
+        
+        """Function to set global settings for the charts class. 
+        
+        """
+        
+        sns.set(font_scale=1.5) 
         mpl.rc('font',family='Libre Franklin')
     
     def chloro_map(con, df, lower, upper, title, **kwargs):
+        """Creates a chloropleth map
+        
+        Parameters
+        -----------
+        con : SQL connection object
+            Connection object needed to connect to the RDS
+        df : GeoPandas Dataframe
+            Data for the chloropleth map. The data must only contain 2 columns; the first column has to be the geom column and the second has to be the data that needs to be mapped.
+        lower : int
+            Lower bound for colourmap
+        upper : int
+            Upper bound for the colourmap
+        title : str
+            Legend label
+        subway : boolean, optional, default: False
+            True to display subway on the map
+        island : boolean, optional, defailt: True
+            False to grey out the Toronto island
+        cmap : str, optional, default: YlOrRd
+            Matplotlib colourmap to use for the map
+        unit : str, optional
+            Unit to append to the end of the legend tick
+        nbins : int, optional, defualt: 2
+            Number of ticks in the colourmap
+            
+        Returns 
+        --------
+        fig
+            Matplotlib fig object
+        ax 
+            Matplotlib ax object
+            
+        """
         
         func()
         subway = kwargs.get('subway', False)
         island = kwargs.get('island', True)
-        cmap = kwargs.get('cmap', 'YlOrRd')
+        cmap = kwargs.get('cmap', colour.cmap)
         unit = kwargs.get('unit', None)
         nbins = kwargs.get('nbins', 2)
         
@@ -147,6 +232,35 @@ class charts:
         return fig, ax
     
     def line_chart(data, ylab, xlab, **kwargs):
+        """Creates a line chart. x axis must be modified manually
+        
+        Parameters
+        -----------
+        data : array like or scalar
+            Data for the line chart.
+        ylab : str
+            Label for the y axis.
+        xlab : str
+            Label for the x axis.
+        ymax : int, optional, default is the max y value
+            The max value of the y axis
+        ymin : int, optional, default is 0
+            The minimum value of the y axis
+        baseline : array like or scalar, optional, default is None
+            Whether another line representing the baseline needs to be plotted
+        yinc : int, optional
+            The increment of ticks on the y axis.
+        
+        Returns 
+        --------
+        fig
+            Matplotlib fig object
+        ax 
+            Matplotlib ax object
+        props
+            Dictionary of the text annotation properties
+            
+        """
         
         func()
         ymax = kwargs.get('ymax', int(data.max()))
@@ -185,10 +299,34 @@ class charts:
         ax.set_ylim([ymin,int(4*yinc+ymin)])
         fig.patch.set_facecolor('w')
         
-        return fig, ax
+        return fig, ax, props
     
     def tow_chart(data, ylab, **kwargs):
+        """Creates a 7 day time of week line chart. Each data point represents 1 hour out of 168 hours.
         
+        Parameters
+        -----------
+        data : array like or scalar
+            Data for the tow chart. Data must only have 168 entries, with row 0 representing Monday at midnight.
+        ylab : str
+            Label for the y axis.
+        ymax : int, optional, default is the max y value
+            The max value of the y axis
+        ymin : int, optional, default is 0
+            The minimum value of the y axis
+        yinc : int, optional
+            The increment of ticks on the y axis.
+        
+        Returns 
+        --------
+        fig
+            Matplotlib fig object
+        ax 
+            Matplotlib ax object
+        props
+            Dictionary of the text annotation properties
+            
+        """
         func()
         ymax = kwargs.get('ymax', None)
         ymin = kwargs.get('ymin', 0)
@@ -244,9 +382,41 @@ class charts:
         props = dict(boxstyle='round, pad=0.3',edgecolor=colour.purple, linewidth = 1.5, facecolor = 'w', alpha=1)
 
         ax.set_xlim([0,167])
-        return fig, ax
+        return fig, ax, prop
 
     def stacked_chart(data_in, xlab, lab1, lab2, **kwargs):
+        """Creates a stacked bar chart comparing 2 sets of data
+        
+        Parameters
+        -----------
+        data : dataframe
+            Data for the stacked bar chart. The dataframe must have 3 columns, the first representing the y ticks, the second representing the baseline, and the third representing the next series of data.
+        xlab : str
+            Label for the x axis.
+        lab1 : str
+            Label in the legend for the baseline
+        lab2 : str
+            Label in the legend fot the next data series
+        xmax : int, optional, default is the max s value
+            The max value of the y axis
+        xmin : int, optional, default is 0
+            The minimum value of the x axis
+        precision : int, optional, default is -1
+            Decimal places in the annotations
+        percent : boolean, optional, default is False
+            Whether the annotations should be formatted as percentages
+            
+        xinc : int, optional
+            The increment of ticks on the x axis.
+        
+        Returns 
+        --------
+        fig
+            Matplotlib fig object
+        ax 
+            Matplotlib ax object
+            
+        """
         
         func()
         data = data_in.copy(deep=True)
@@ -331,7 +501,32 @@ class charts:
         return fig, ax
     
     def bar_chart(data_in, xlab,**kwargs):
+        """Creates a bar chart
         
+        Parameters
+        -----------
+        data : dataframe
+            Data for the bar chart. The dataframe must have 2 columns, the first representing the y ticks, and the second representing the data
+        xlab : str
+            Label for the x axis.
+        xmax : int, optional, default is the max s value
+            The max value of the y axis
+        xmin : int, optional, default is 0
+            The minimum value of the x axis
+        precision : int, optional, default is -1
+            Decimal places in the annotations
+            
+        xinc : int, optional
+            The increment of ticks on the x axis.
+        
+        Returns 
+        --------
+        fig
+            Matplotlib fig object
+        ax 
+            Matplotlib ax object
+            
+        """
         func()
         data = data_in.copy(deep=True)
         
