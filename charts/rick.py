@@ -382,7 +382,7 @@ class charts:
         props = dict(boxstyle='round, pad=0.3',edgecolor=colour.purple, linewidth = 1.5, facecolor = 'w', alpha=1)
 
         ax.set_xlim([0,167])
-        return fig, ax, prop
+        return fig, ax, props
 
     def stacked_chart(data_in, xlab, lab1, lab2, **kwargs):
         """Creates a stacked bar chart comparing 2 sets of data

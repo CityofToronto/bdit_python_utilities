@@ -33,7 +33,12 @@ sys.path.insert(0, os.path.abspath('.'))
 # ones.
 extensions = ['sphinx.ext.autodoc',
     'sphinx.ext.doctest',
-    'sphinx.ext.viewcode', 'sphinx.ext.coverage', 'sphinx.ext.napoleon']
+    'sphinx.ext.viewcode', 'sphinx.ext.coverage', 'sphinx.ext.napoleon', 'sphinx_gallery.gen_gallery']
+
+sphinx_gallery_conf = {
+     'examples_dirs': 'example',   # path to your example scripts
+     'gallery_dirs': 'auto_examples',  # path where to save gallery generated examples
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
