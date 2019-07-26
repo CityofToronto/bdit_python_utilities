@@ -26,7 +26,11 @@ import importlib
 import matplotlib.ticker as ticker
 import matplotlib.font_manager as font_manager
 
-
+################################
+#Data Collection
+#----------------
+#
+#This creates a test dataframe to use
 pass_data = {'cat': ['PTC','Taxi',  'Trip Making Population'],
         'TTC Pass': [22,16,16],
         }

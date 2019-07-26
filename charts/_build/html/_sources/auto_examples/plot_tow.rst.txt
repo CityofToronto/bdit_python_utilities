@@ -13,14 +13,6 @@ Time of Week Chart
 Makes an example of a time of week chart.
 
 
-
-.. image:: /auto_examples/images/sphx_glr_plot_tow_001.png
-    :class: sphx-glr-single-img
-
-
-
-
-
 .. code-block:: default
 
 
@@ -51,6 +43,19 @@ Makes an example of a time of week chart.
     dbset = CONFIG['DBSETTINGS']
     con = connect(**dbset)
 
+
+
+
+
+
+Data Collection
+----------------
+
+This Section grabs and formats the data.
+
+
+.. code-block:: default
+
     query = '''
 
     WITH sum AS (
@@ -79,9 +84,17 @@ Makes an example of a time of week chart.
 
     fig, ax, prop = rick.charts.tow_chart(data = count_18['count'], ylab='Trips', ymax = 14000, yinc= 3500)
 
+
+.. image:: /auto_examples/images/sphx_glr_plot_tow_001.png
+    :class: sphx-glr-single-img
+
+
+
+
+
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.390 seconds)
+   **Total running time of the script:** ( 0 minutes  1.408 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_tow.py:

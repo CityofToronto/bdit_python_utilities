@@ -31,6 +31,11 @@ CONFIG = configparser.ConfigParser()
 CONFIG.read(r'C:\Users\rliu4\Documents\Python\config.cfg')
 dbset = CONFIG['DBSETTINGS']
 con = connect(**dbset)
+################################
+#Data Collection
+#----------------
+#
+#This Section grabs and formats the data.
 
 query='''
 WITH daily_ave AS (
@@ -56,6 +61,10 @@ END AS period,
 count FROM total
 '''
 total=pandasql.read_sql(query, con)
+################################
+#Gets the baseline data (to be graphed in grey)
+
+
 
 query='''
 WITH daily_ave AS (
@@ -84,10 +93,12 @@ total2=pandasql.read_sql(query, con)
 
 fig, ax, props = rick.charts.line_chart(total['count'], 'Trips', 'Time', baseline = total2['count'])
 
-
+################################
+#Adds annotations
 fig.text(0.94, 0.96, '176,000', transform=ax.transAxes, wrap = True, fontsize=9, fontname = 'Libre Franklin',
          verticalalignment='top', ha = 'center', bbox=props, color = '#660159')
-
+################################
+#Adds custom x axis
 month_lst2 = ['Sept\n2016',  'Jan\n2017',  'May',  'Sept',
                'Jan\n2018', 'May',  'Sept', 
               'Jan\n2019','May',]

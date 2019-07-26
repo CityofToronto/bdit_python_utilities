@@ -13,14 +13,6 @@ Stacked Bar Chart
 Makes an example of a stacked bar chart.
 
 
-
-.. image:: /auto_examples/images/sphx_glr_plot_stacked_001.png
-    :class: sphx-glr-single-img
-
-
-
-
-
 .. code-block:: default
 
 
@@ -50,6 +42,19 @@ Makes an example of a stacked bar chart.
     CONFIG.read(r'C:\Users\rliu4\Documents\Python\config.cfg')
     dbset = CONFIG['DBSETTINGS']
     con = connect(**dbset)
+
+
+
+
+
+
+Data Collection
+----------------
+
+This Section grabs and formats the data.
+
+
+.. code-block:: default
 
     query = ''' 
 
@@ -85,9 +90,17 @@ Makes an example of a stacked bar chart.
 
     fig, ax = rick.charts.stacked_chart(district_cond, xlab = 'Trips', lab1 = '2016', lab2 = '2018', percent = True)
 
+
+.. image:: /auto_examples/images/sphx_glr_plot_stacked_001.png
+    :class: sphx-glr-single-img
+
+
+
+
+
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.260 seconds)
+   **Total running time of the script:** ( 0 minutes  3.557 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_stacked.py:

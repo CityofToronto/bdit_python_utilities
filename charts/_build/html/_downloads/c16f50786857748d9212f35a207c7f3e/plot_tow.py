@@ -31,7 +31,11 @@ CONFIG = configparser.ConfigParser()
 CONFIG.read(r'C:\Users\rliu4\Documents\Python\config.cfg')
 dbset = CONFIG['DBSETTINGS']
 con = connect(**dbset)
-
+################################
+#Data Collection
+#----------------
+#
+#This Section grabs and formats the data.
 query = '''
 
 WITH sum AS (

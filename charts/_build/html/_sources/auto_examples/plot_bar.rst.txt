@@ -13,14 +13,6 @@ Bar Chart
 Makes an example of a bar chart.
 
 
-
-.. image:: /auto_examples/images/sphx_glr_plot_bar_001.png
-    :class: sphx-glr-single-img
-
-
-
-
-
 .. code-block:: default
 
 
@@ -46,6 +38,19 @@ Makes an example of a bar chart.
     import matplotlib.font_manager as font_manager
 
 
+
+
+
+
+
+Data Collection
+----------------
+
+This creates a test dataframe to use
+
+
+.. code-block:: default
+
     pass_data = {'cat': ['PTC','Taxi',  'Trip Making Population'],
             'TTC Pass': [22,16,16],
             }
@@ -55,9 +60,17 @@ Makes an example of a bar chart.
 
     fig, ax = rick.charts.bar_chart(transit_pass, xlab='Trips')
 
+
+.. image:: /auto_examples/images/sphx_glr_plot_bar_001.png
+    :class: sphx-glr-single-img
+
+
+
+
+
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.632 seconds)
+   **Total running time of the script:** ( 0 minutes  27.838 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_bar.py:

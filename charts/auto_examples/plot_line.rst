@@ -13,14 +13,6 @@ Line Chart
 Makes an example of a line chart, with an additional baseline plot and custom formatted x axis.
 
 
-
-.. image:: /auto_examples/images/sphx_glr_plot_line_001.png
-    :class: sphx-glr-single-img
-
-
-
-
-
 .. code-block:: default
 
 
@@ -51,6 +43,20 @@ Makes an example of a line chart, with an additional baseline plot and custom fo
     dbset = CONFIG['DBSETTINGS']
     con = connect(**dbset)
 
+
+
+
+
+
+Data Collection
+----------------
+
+This Section grabs and formats the data.
+
+
+.. code-block:: default
+
+
     query='''
     WITH daily_ave AS (
 
@@ -75,6 +81,19 @@ Makes an example of a line chart, with an additional baseline plot and custom fo
     count FROM total
     '''
     total=pandasql.read_sql(query, con)
+
+
+
+
+
+
+Gets the baseline data (to be graphed in grey)
+
+
+.. code-block:: default
+
+
+
 
     query='''
     WITH daily_ave AS (
@@ -104,8 +123,31 @@ Makes an example of a line chart, with an additional baseline plot and custom fo
     fig, ax, props = rick.charts.line_chart(total['count'], 'Trips', 'Time', baseline = total2['count'])
 
 
+
+
+.. image:: /auto_examples/images/sphx_glr_plot_line_001.png
+    :class: sphx-glr-single-img
+
+
+
+
+Adds annotations
+
+
+.. code-block:: default
+
     fig.text(0.94, 0.96, '176,000', transform=ax.transAxes, wrap = True, fontsize=9, fontname = 'Libre Franklin',
              verticalalignment='top', ha = 'center', bbox=props, color = '#660159')
+
+
+
+
+
+
+Adds custom x axis
+
+
+.. code-block:: default
 
     month_lst2 = ['Sept\n2016',  'Jan\n2017',  'May',  'Sept',
                    'Jan\n2018', 'May',  'Sept', 
@@ -114,9 +156,17 @@ Makes an example of a line chart, with an additional baseline plot and custom fo
 
 
 
+
+.. image:: /auto_examples/images/sphx_glr_plot_line_002.png
+    :class: sphx-glr-single-img
+
+
+
+
+
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.376 seconds)
+   **Total running time of the script:** ( 0 minutes  1.126 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_line.py:
