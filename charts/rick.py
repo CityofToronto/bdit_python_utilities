@@ -19,9 +19,6 @@ from shapely.geometry import Point
 import matplotlib.font_manager as font_manager
 import numpy as np
 
-#shapely workaround for windows
-#os.environ["PROJ_LIB"]=r"C:\Users\rliu4\AppData\Local\Continuum\anaconda3\Library\share"
-
 class font:
     """
     Class defining the global font variables for all functions.
@@ -278,7 +275,8 @@ class charts:
         
         fig, ax =plt.subplots()
         ax.plot(data ,linewidth=3, color = colour.purple)
-        ax.plot(baseline ,linewidth=3, color = colour.grey)
+        if baseline:
+            ax.plot(baseline ,linewidth=3, color = colour.grey)
 
         plt.grid()
         ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
@@ -288,13 +286,16 @@ class charts:
         plt.xlabel(xlab, fontsize=9, fontweight = 'bold', horizontalalignment='right', x=0, labelpad=10, 
                    fontname = font.normal)
         ax.grid(color='k', linestyle='-', linewidth=0.2)
-        plt.ylabel(ylab, fontsize=9, fontweight = 'bold', horizontalalignment='right', y=1.0, 
+        plt.ylabel(ylab, fontsize=9, fontweight = 'bold',
+                   horizontalalignment='right', y=1.0, 
                    labelpad=10, fontname = font.normal)
         fig.set_size_inches(6.1, 4.1)
         plt.xticks(fontsize=9, fontname = font.normal)
-        plt.yticks(range(ymin,int(4.1*yinc), yinc), fontsize =9, fontname = font.normal)
+        plt.yticks(range(ymin,int(4.1*yinc), yinc), fontsize =9,
+                   fontname = font.normal)
 
-        props = dict(boxstyle='round, pad=0.4',edgecolor=colour.purple, linewidth = 2, facecolor = 'w', alpha=1)
+        props = dict(boxstyle='round, pad=0.4',edgecolor=colour.purple,
+                     linewidth = 2, facecolor = 'w', alpha=1)
 
         ax.set_ylim([ymin,int(4*yinc+ymin)])
         fig.patch.set_facecolor('w')
