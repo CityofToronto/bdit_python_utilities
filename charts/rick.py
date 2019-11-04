@@ -297,7 +297,7 @@ class charts:
         props = dict(boxstyle='round, pad=0.4',edgecolor=colour.purple,
                      linewidth = 2, facecolor = 'w', alpha=1)
 
-        ax.set_ylim([ymin,int(4*yinc+ymin)])
+        ax.set_ylim([ymin, ymax])
         fig.patch.set_facecolor('w')
         
         return fig, ax, props
