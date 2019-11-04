@@ -291,7 +291,7 @@ class charts:
                    labelpad=10, fontname = font.normal)
         fig.set_size_inches(6.1, 4.1)
         plt.xticks(fontsize=9, fontname = font.normal)
-        plt.yticks(range(ymin,int(4.1*yinc), yinc), fontsize =9,
+        plt.yticks(range(ymin, ymax + yinc, yinc), fontsize =9,
                    fontname = font.normal)
 
         props = dict(boxstyle='round, pad=0.4',edgecolor=colour.purple,
