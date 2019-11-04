@@ -244,7 +244,7 @@ class charts:
         ymin : int, optional, default is 0
             The minimum value of the y axis
         baseline : array like or scalar, optional, default is None
-            Whether another line representing the baseline needs to be plotted
+            Data for another line representing the baseline.
         yinc : int, optional
             The increment of ticks on the y axis.
         
@@ -275,7 +275,7 @@ class charts:
         
         fig, ax =plt.subplots()
         ax.plot(data ,linewidth=3, color = colour.purple)
-        if baseline:
+        if baseline is not None:
             ax.plot(baseline ,linewidth=3, color = colour.grey)
 
         plt.grid()
