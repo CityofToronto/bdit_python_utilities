@@ -1,5 +1,5 @@
 Line Charts
-==========
+===========
 
 Below is a gallery of line charts. 
 

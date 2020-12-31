@@ -5,8 +5,8 @@
 
 Computation times
 =================
-**00:01.182** total execution time for **auto_examples_bar** files:
+**00:01.158** total execution time for **auto_examples_bar** files:
 
 +---------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_examples_bar_plot_bar_rick.py` (``plot_bar_rick.py``) | 00:01.182 | 0.0 MB |
+| :ref:`sphx_glr_auto_examples_bar_plot_bar_rick.py` (``plot_bar_rick.py``) | 00:01.158 | 0.0 MB |
 +---------------------------------------------------------------------------+-----------+--------+

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Line Chart &#8212; VFH Charts 2019-07-16 documentation</title>
+    <title>RICK Line Chart &#8212; VFH Charts 2019-07-16 documentation</title>
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -18,7 +18,7 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="prev" title="Bar Chart" href="../bar/plot_bar_rick.html" />
+    <link rel="prev" title="RICK Bar Chart" href="../bar/plot_bar_rick.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -40,9 +40,9 @@
 <p>Click <a class="reference internal" href="#sphx-glr-download-auto-examples-line-plot-line-rick-py"><span class="std std-ref">here</span></a>
 to download the full example code</p>
 </div>
-<div class="sphx-glr-example-title section" id="line-chart">
-<span id="sphx-glr-auto-examples-line-plot-line-rick-py"></span><h1>Line Chart<a class="headerlink" href="#line-chart" title="Permalink to this headline">¶</a></h1>
-<p>Makes an example of a line chart, with an additional baseline plot and custom formatted x axis.</p>
+<div class="sphx-glr-example-title section" id="rick-line-chart">
+<span id="sphx-glr-auto-examples-line-plot-line-rick-py"></span><h1>RICK Line Chart<a class="headerlink" href="#rick-line-chart" title="Permalink to this headline">¶</a></h1>
+<p>Example line chart from the RICK package, with an additional baseline plot and custom formatted x axis.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="kn">import</span> <span class="n">create_engine</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
@@ -59,7 +59,7 @@ to download the full example code</p>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">shapely</span>
 <span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">Point</span>
-<span class="c1"># os.environ[&quot;PROJ_LIB&quot;]=r&quot;C:\Users\rliu4\AppData\Local\Continuum\anaconda3\Library\share&quot;</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;PROJ_LIB&quot;</span><span class="p">]</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;C:\Users\rliu4\AppData\Local\Continuum\anaconda3\Library\share&quot;</span>
 <span class="kn">import</span> <span class="nn">importlib</span>
 <span class="kn">import</span> <span class="nn">matplotlib.ticker</span> <span class="k">as</span> <span class="nn">ticker</span>
 <span class="kn">import</span> <span class="nn">matplotlib.font_manager</span> <span class="k">as</span> <span class="nn">font_manager</span>
@@ -143,10 +143,10 @@ to download the full example code</p>
 </div>
 <img alt="plot line rick" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_line_rick_002.png" />
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>([&lt;matplotlib.axis.XTick object at 0x7f91ca455390&gt;, &lt;matplotlib.axis.XTick object at 0x7f91cad10be0&gt;, &lt;matplotlib.axis.XTick object at 0x7f91cad10940&gt;, &lt;matplotlib.axis.XTick object at 0x7f91ca466748&gt;, &lt;matplotlib.axis.XTick object at 0x7f91ca466c18&gt;, &lt;matplotlib.axis.XTick object at 0x7f91ca466f60&gt;, &lt;matplotlib.axis.XTick object at 0x7f91ca46a4a8&gt;, &lt;matplotlib.axis.XTick object at 0x7f91ca46a9b0&gt;, &lt;matplotlib.axis.XTick object at 0x7f91ca46aeb8&gt;], &lt;a list of 9 Text xticklabel objects&gt;)
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>([&lt;matplotlib.axis.XTick object at 0x7f829552a518&gt;, &lt;matplotlib.axis.XTick object at 0x7f8295de6d68&gt;, &lt;matplotlib.axis.XTick object at 0x7f8295de6a90&gt;, &lt;matplotlib.axis.XTick object at 0x7f829553b8d0&gt;, &lt;matplotlib.axis.XTick object at 0x7f829553bda0&gt;, &lt;matplotlib.axis.XTick object at 0x7f829553bbe0&gt;, &lt;matplotlib.axis.XTick object at 0x7f829553f630&gt;, &lt;matplotlib.axis.XTick object at 0x7f829553fb38&gt;, &lt;matplotlib.axis.XTick object at 0x7f829553f470&gt;], &lt;a list of 9 Text xticklabel objects&gt;)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.213 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.226 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-line-plot-line-rick-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/557eb1192c61267ac4f53a876c525bc1/plot_line_rick.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_line_rick.py</span></code></a></p>
@@ -170,7 +170,7 @@ to download the full example code</p>
 <ul>
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../index.html">Gallery of Charts</a><ul>
-      <li>Previous: <a href="../bar/plot_bar_rick.html" title="previous chapter">Bar Chart</a></li>
+      <li>Previous: <a href="../bar/plot_bar_rick.html" title="previous chapter">RICK Bar Chart</a></li>
   </ul></li>
   </ul></li>
 </ul>

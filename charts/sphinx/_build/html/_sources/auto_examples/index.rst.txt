@@ -50,12 +50,12 @@ Below is a gallery of bar charts.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Makes an example of a bar chart. ">
+    <div class="sphx-glr-thumbcontainer" tooltip="Example bar chart from the RICK module. ">
 
 .. only:: html
 
  .. figure:: /auto_examples/bar/images/thumb/sphx_glr_plot_bar_rick_thumb.png
-     :alt: Bar Chart
+     :alt: RICK Bar Chart
 
      :ref:`sphx_glr_auto_examples_bar_plot_bar_rick.py`
 
@@ -77,7 +77,7 @@ Below is a gallery of bar charts.
 .. _sphx_glr_auto_examples_line:
 
 Line Charts
-==========
+===========
 
 Below is a gallery of line charts. 
 
@@ -88,12 +88,12 @@ Below is a gallery of line charts.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Makes an example of a line chart, with an additional baseline plot and custom formatted x axis....">
+    <div class="sphx-glr-thumbcontainer" tooltip="Example line chart from the RICK package, with an additional baseline plot and custom formatted...">
 
 .. only:: html
 
  .. figure:: /auto_examples/line/images/thumb/sphx_glr_plot_line_rick_thumb.png
-     :alt: Line Chart
+     :alt: RICK Line Chart
 
      :ref:`sphx_glr_auto_examples_line_plot_line_rick.py`
 

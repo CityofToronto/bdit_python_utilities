@@ -18,10 +18,10 @@
 .. _sphx_glr_auto_examples_bar_plot_bar_rick.py:
 
 
-Bar Chart
+RICK Bar Chart
 ==================
 
-Makes an example of a bar chart.
+Example bar chart from the RICK module.
 
 .. GENERATED FROM PYTHON SOURCE LINES 7-29
 
@@ -89,7 +89,7 @@ This creates a test dataframe to use
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.182 seconds)
+   **Total running time of the script:** ( 0 minutes  1.158 seconds)
 
 
 .. _sphx_glr_download_auto_examples_bar_plot_bar_rick.py:

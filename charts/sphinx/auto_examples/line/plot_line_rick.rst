@@ -18,10 +18,10 @@
 .. _sphx_glr_auto_examples_line_plot_line_rick.py:
 
 
-Line Chart
+RICK Line Chart
 ==================
 
-Makes an example of a line chart, with an additional baseline plot and custom formatted x axis.
+Example line chart from the RICK package, with an additional baseline plot and custom formatted x axis.
 
 .. GENERATED FROM PYTHON SOURCE LINES 7-35
 
@@ -44,7 +44,7 @@ Makes an example of a line chart, with an additional baseline plot and custom fo
     import os
     import shapely
     from shapely.geometry import Point
-    # os.environ["PROJ_LIB"]=r"C:\Users\rliu4\AppData\Local\Continuum\anaconda3\Library\share"
+    os.environ["PROJ_LIB"]=r"C:\Users\rliu4\AppData\Local\Continuum\anaconda3\Library\share"
     import importlib
     import matplotlib.ticker as ticker
     import matplotlib.font_manager as font_manager
@@ -200,14 +200,14 @@ Adds custom x axis
  .. code-block:: none
 
 
-    ([<matplotlib.axis.XTick object at 0x7f91ca455390>, <matplotlib.axis.XTick object at 0x7f91cad10be0>, <matplotlib.axis.XTick object at 0x7f91cad10940>, <matplotlib.axis.XTick object at 0x7f91ca466748>, <matplotlib.axis.XTick object at 0x7f91ca466c18>, <matplotlib.axis.XTick object at 0x7f91ca466f60>, <matplotlib.axis.XTick object at 0x7f91ca46a4a8>, <matplotlib.axis.XTick object at 0x7f91ca46a9b0>, <matplotlib.axis.XTick object at 0x7f91ca46aeb8>], <a list of 9 Text xticklabel objects>)
+    ([<matplotlib.axis.XTick object at 0x7f829552a518>, <matplotlib.axis.XTick object at 0x7f8295de6d68>, <matplotlib.axis.XTick object at 0x7f8295de6a90>, <matplotlib.axis.XTick object at 0x7f829553b8d0>, <matplotlib.axis.XTick object at 0x7f829553bda0>, <matplotlib.axis.XTick object at 0x7f829553bbe0>, <matplotlib.axis.XTick object at 0x7f829553f630>, <matplotlib.axis.XTick object at 0x7f829553fb38>, <matplotlib.axis.XTick object at 0x7f829553f470>], <a list of 9 Text xticklabel objects>)
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.213 seconds)
+   **Total running time of the script:** ( 0 minutes  0.226 seconds)
 
 
 .. _sphx_glr_download_auto_examples_line_plot_line_rick.py:

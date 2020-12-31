@@ -1,8 +1,8 @@
 """
-Line Chart
+RICK Line Chart
 ==================
 
-Makes an example of a line chart, with an additional baseline plot and custom formatted x axis.
+Example line chart from the RICK package, with an additional baseline plot and custom formatted x axis.
 """
 
 from sqlalchemy import create_engine
@@ -21,7 +21,7 @@ import geopandas as gpd
 import os
 import shapely
 from shapely.geometry import Point
-# os.environ["PROJ_LIB"]=r"C:\Users\rliu4\AppData\Local\Continuum\anaconda3\Library\share"
+os.environ["PROJ_LIB"]=r"C:\Users\rliu4\AppData\Local\Continuum\anaconda3\Library\share"
 import importlib
 import matplotlib.ticker as ticker
 import matplotlib.font_manager as font_manager

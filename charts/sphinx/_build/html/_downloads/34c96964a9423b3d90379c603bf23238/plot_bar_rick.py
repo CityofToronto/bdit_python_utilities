@@ -1,8 +1,8 @@
 """
-Bar Chart
+RICK Bar Chart
 ==================
 
-Makes an example of a bar chart.
+Example bar chart from the RICK module.
 """
 
 from sqlalchemy import create_engine
