@@ -175,6 +175,44 @@ Below is a gallery of line charts.
 
 
 
+.. _sphx_glr_auto_examples_map:
+
+****
+Maps
+****
+
+Below is a gallery of various types of maps. 
+
+- RICK Choropleth Map: derives from the RICK package with source code in `rick.py`.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Example chloropleth map. ">
+
+.. only:: html
+
+ .. figure:: /auto_examples/map/images/thumb/sphx_glr_plot_choropleth_rick_thumb.png
+     :alt: RICK Choropleth Map
+
+     :ref:`sphx_glr_auto_examples_map_plot_choropleth_rick.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/map/plot_choropleth_rick
+.. raw:: html
+
+    <div class="sphx-glr-clear"></div>
+
+
+
 .. only :: html
 
  .. container:: sphx-glr-footer

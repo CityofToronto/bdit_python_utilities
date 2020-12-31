@@ -1,8 +1,8 @@
 """
-Chloropleth Map
-==================
+RICK Choropleth Map
+===================
 
-Makes an example of a chloropleth map.
+Example chloropleth map.
 """
 
 
@@ -26,8 +26,10 @@ os.environ["PROJ_LIB"]=r"C:\Users\rliu4\AppData\Local\Continuum\anaconda3\Librar
 import importlib
 import matplotlib.ticker as ticker
 import matplotlib.font_manager as font_manager
+
 CONFIG = configparser.ConfigParser()
-CONFIG.read(r'C:\Users\rliu4\Documents\Python\config.cfg')
+# CONFIG.read(r'C:\Users\rliu4\Documents\Python\config.cfg')
+CONFIG.read(r'/home/cnangini/db.cfg')
 dbset = CONFIG['DBSETTINGS']
 con = connect(**dbset)
 
@@ -65,11 +67,15 @@ LEFT JOIN gis.neighbourhood ON area_s_cd::integer=pickup_neighbourhood
 ################################
 # Rotates data 17 degrees to orient Toronto perpendicularly
 data = gpd.GeoDataFrame.from_postgis(query, con, geom_col='geom')
-data = data.to_crs({'init' :'epsg:3857'})
+# data = data.to_crs({'init' :'epsg:3857'})
+data = data.to_crs(epsg=3857)
 
-for index, row in data.iterrows():
-    rotated = shapely.affinity.rotate(row['geom'], angle=-17, origin = Point(0, 0))
-    data.at[index, 'geom'] = rotated
+## Below doesn't work because one row is MULTIPOLYGON and the
+## other rows are POLYGON
+# for index, row in data.iterrows():
+#     rotated = shapely.affinity.rotate(row['geom'], angle=-17, origin = Point(0, 0))
+#     data.at[index, 'geom'] = rotated
+data['geom']=data['geom'].apply(lambda x: shapely.affinity.rotate(x, angle=-17, origin = Point(0, 0)))
 
 ################################
 #The function only needs these columns, in this order
@@ -83,4 +89,5 @@ data=data[['geom', 'growth']]
 #
 fig, ax = rick.charts.chloro_map(con, data, subway = True, lower = 0, upper = 300, title = 'Growth in Trips', 
                                        island = False,  unit = '%', nbins = 3)
+
 
