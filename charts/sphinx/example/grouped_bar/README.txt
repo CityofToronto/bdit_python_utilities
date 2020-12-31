@@ -1,5 +1,6 @@
+******************
 Grouped Bar Charts
-==================
+******************
 
 Below is a gallery of grouped bar charts. 
 

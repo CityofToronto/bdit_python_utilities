@@ -38,8 +38,9 @@ Below is a gallery of example charts for each charting function in rick.charts.
 
 .. _sphx_glr_auto_examples_bar:
 
+**********
 Bar Charts
-==========
+**********
 
 Below is a gallery of bar charts. 
 
@@ -76,8 +77,9 @@ Below is a gallery of bar charts.
 
 .. _sphx_glr_auto_examples_grouped_bar:
 
+******************
 Grouped Bar Charts
-==================
+******************
 
 Below is a gallery of grouped bar charts. 
 
@@ -114,12 +116,9 @@ Below is a gallery of grouped bar charts.
 
 .. _sphx_glr_auto_examples_line:
 
+***********
 Line Charts
-===========
-
-*********
-Sample H2
-*********
+***********
 
 Below is a gallery of line charts. 
 
