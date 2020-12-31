@@ -7,29 +7,11 @@
 Gallery of Charts
 ==================
 
-Below is a gallery of example charts for each charting function in rick.charts. 
+Below is a gallery of example charts for different types of charts and maps. Some examples derive from the RICK module (source code `rick.py`) to be used straight out of the box (with some customization possible). 
+
+Other examples are stand-alone with the source code contained directly in the example page. 
 
 
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="Makes an example of a fake chart. ">
-
-.. only:: html
-
- .. figure:: /auto_examples/images/thumb/sphx_glr_plot_fake_thumb.png
-     :alt: Fake Chart
-
-     :ref:`sphx_glr_auto_examples_plot_fake.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /auto_examples/plot_fake
 .. raw:: html
 
     <div class="sphx-glr-clear"></div>
