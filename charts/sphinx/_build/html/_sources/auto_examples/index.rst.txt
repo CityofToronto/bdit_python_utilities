@@ -117,12 +117,36 @@ Below is a gallery of grouped bar charts.
 Line Charts
 ===========
 
+## Test heading
+
 Below is a gallery of line charts. 
 
 - RICK Line Chart: derives from the RICK package with source code in `rick.py`.
+- RICK Time-of-Week Line Chart: derives from the RICK package with source code in `rick.py`.
 - activeTO Line Chart: developed for activeTO with source code inside the example. 
 
 
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Example time-of-week line chart. ">
+
+.. only:: html
+
+ .. figure:: /auto_examples/line/images/thumb/sphx_glr_plot_tow_line_rick_thumb.png
+     :alt: RICK Time-of-Week Line Chart
+
+     :ref:`sphx_glr_auto_examples_line_plot_tow_line_rick.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/line/plot_tow_line_rick
 
 .. raw:: html
 
