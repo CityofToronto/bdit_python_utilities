@@ -66,7 +66,8 @@ class geo:
         
         '''
         ttc = gpd.GeoDataFrame.from_postgis(query, con, geom_col='geom')
-        ttc = ttc.to_crs({'init' :'epsg:3857'})
+        # ttc = ttc.to_crs({'init' :'epsg:3857'})
+        ttc = ttc.to_crs(epsg=3857)
         
         for index, row in ttc.iterrows():
             rotated = shapely.affinity.rotate(row['geom'], angle=-17, origin = Point(0, 0))
@@ -100,7 +101,8 @@ class geo:
         '''
 
         island =  gpd.GeoDataFrame.from_postgis(query, con, geom_col='geom')
-        island  = island.to_crs({'init' :'epsg:3857'})
+        # island  = island.to_crs({'init' :'epsg:3857'})
+        island  = island.to_crs(epsg=3857)
 
         for index, row in island.iterrows():
             rotated = shapely.affinity.rotate(row['geom'], angle=-17, origin = Point(0, 0)) 
