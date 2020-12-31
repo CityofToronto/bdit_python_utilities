@@ -5,21 +5,23 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Stacked Bar Chart &#8212; VFH Charts 2019-07-16 documentation</title>
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" type="text/css" href="../_static/gallery.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/gallery-binder.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/gallery-dataframe.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/gallery-rendered-html.css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
+    <title>RICK Grouped Bar Chart &#8212; VFH Charts 2019-07-16 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-rendered-html.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="RICK Line Chart" href="../line/plot_line_rick.html" />
+    <link rel="prev" title="RICK Bar Chart" href="../bar/plot_bar_rick.html" />
    
-  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
@@ -36,12 +38,12 @@
             
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
-<p>Click <a class="reference internal" href="#sphx-glr-download-auto-examples-plot-stacked-py"><span class="std std-ref">here</span></a>
+<p>Click <a class="reference internal" href="#sphx-glr-download-auto-examples-grouped-bar-plot-grouped-bar-rick-py"><span class="std std-ref">here</span></a>
 to download the full example code</p>
 </div>
-<div class="sphx-glr-example-title section" id="stacked-bar-chart">
-<span id="sphx-glr-auto-examples-plot-stacked-py"></span><h1>Stacked Bar Chart<a class="headerlink" href="#stacked-bar-chart" title="Permalink to this headline">¶</a></h1>
-<p>Makes an example of a stacked bar chart.</p>
+<div class="sphx-glr-example-title section" id="rick-grouped-bar-chart">
+<span id="sphx-glr-auto-examples-grouped-bar-plot-grouped-bar-rick-py"></span><h1>RICK Grouped Bar Chart<a class="headerlink" href="#rick-grouped-bar-chart" title="Permalink to this headline">¶</a></h1>
+<p>Example of a horizontal grouped bar chart.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="kn">import</span> <span class="n">create_engine</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
@@ -65,17 +67,10 @@ to download the full example code</p>
 
 
 <span class="n">CONFIG</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
-<span class="n">CONFIG</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;C:\Users\rliu4\Documents\Python\config.cfg&#39;</span><span class="p">)</span>
+<span class="c1"># CONFIG.read(r&#39;C:\Users\rliu4\Documents\Python\config.cfg&#39;)</span>
+<span class="n">CONFIG</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;/home/cnangini/db.cfg&#39;</span><span class="p">)</span>
 <span class="n">dbset</span> <span class="o">=</span> <span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;DBSETTINGS&#39;</span><span class="p">]</span>
 <span class="n">con</span> <span class="o">=</span> <span class="n">connect</span><span class="p">(</span><span class="o">**</span><span class="n">dbset</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="sphx-glr-script-out highlight-pytb notranslate"><div class="highlight"><pre><span></span><span class="gt">Traceback (most recent call last):</span>
-  File <span class="nb">&quot;/home/cnangini/PROJECTS/bdit_python_utilities/charts/sphinx/example/plot_stacked.py&quot;</span>, line <span class="m">32</span>, in <span class="n">&lt;module&gt;</span>
-    <span class="n">dbset</span> <span class="o">=</span> <span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;DBSETTINGS&#39;</span><span class="p">]</span>
-  File <span class="nb">&quot;/usr/lib/python3.5/configparser.py&quot;</span>, line <span class="m">956</span>, in <span class="n">__getitem__</span>
-    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-<span class="gr">KeyError</span>: <span class="n">&#39;DBSETTINGS&#39;</span>
 </pre></div>
 </div>
 <div class="section" id="data-collection">
@@ -116,13 +111,14 @@ to download the full example code</p>
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">rick</span><span class="o">.</span><span class="n">charts</span><span class="o">.</span><span class="n">stacked_chart</span><span class="p">(</span><span class="n">district_cond</span><span class="p">,</span> <span class="n">xlab</span> <span class="o">=</span> <span class="s1">&#39;Trips&#39;</span><span class="p">,</span> <span class="n">lab1</span> <span class="o">=</span> <span class="s1">&#39;2016&#39;</span><span class="p">,</span> <span class="n">lab2</span> <span class="o">=</span> <span class="s1">&#39;2018&#39;</span><span class="p">,</span> <span class="n">percent</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.002 seconds)</p>
-<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-plot-stacked-py">
+<img alt="plot grouped bar rick" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_grouped_bar_rick_001.png" />
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  1.497 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-grouped-bar-plot-grouped-bar-rick-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
-<p><a class="reference download internal" download="" href="../_downloads/b63a70de8a9edfe4730ba18e6fd7cd10/plot_stacked.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_stacked.py</span></code></a></p>
+<p><a class="reference download internal" download="" href="../../_downloads/78784c7b70cf78649c121de31a812562/plot_grouped_bar_rick.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_grouped_bar_rick.py</span></code></a></p>
 </div>
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
-<p><a class="reference download internal" download="" href="../_downloads/c0ce24f4ffa8dab23f408f94a5febac7/plot_stacked.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_stacked.ipynb</span></code></a></p>
+<p><a class="reference download internal" download="" href="../../_downloads/3a807fd942b12b2113f427b590c50f6f/plot_grouped_bar_rick.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_grouped_bar_rick.ipynb</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
@@ -138,14 +134,18 @@ to download the full example code</p>
         <div class="sphinxsidebarwrapper"><div class="relations">
 <h3>Related Topics</h3>
 <ul>
-  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Gallery of Charts</a><ul>
+      <li>Previous: <a href="../bar/plot_bar_rick.html" title="previous chapter">RICK Bar Chart</a></li>
+      <li>Next: <a href="../line/plot_line_rick.html" title="next chapter">RICK Line Chart</a></li>
+  </ul></li>
   </ul></li>
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
-    <form class="search" action="../search.html" method="get">
+    <form class="search" action="../../search.html" method="get">
       <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
@@ -164,7 +164,7 @@ to download the full example code</p>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
-      <a href="../_sources/auto_examples/plot_stacked.rst.txt"
+      <a href="../../_sources/auto_examples/grouped_bar/plot_grouped_bar_rick.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

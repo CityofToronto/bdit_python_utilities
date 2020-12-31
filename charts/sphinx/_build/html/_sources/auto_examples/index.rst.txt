@@ -43,8 +43,8 @@ Bar Charts
 
 Below is a gallery of bar charts. 
 
-- plot_bar_rick.py: derives from the RICK package with source code in `rick.py`.
-- plot_bar_activeto.py: developed for activeTO with source code inside the example. 
+- RICK Bar Chart: derives from the RICK package with source code in `rick.py`.
+- activeTO Bar Chart:  developed for activeTO with source code inside the example. 
 
 
 
@@ -74,6 +74,44 @@ Below is a gallery of bar charts.
 
 
 
+.. _sphx_glr_auto_examples_grouped_bar:
+
+Grouped Bar Charts
+==================
+
+Below is a gallery of grouped bar charts. 
+
+- RICK Grouped Bar Chart: derives from the RICK package with source code in `rick.py`.
+- activeTO Grouped Bar Chart:  developed for activeTO with source code inside the example. 
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Example of a horizontal grouped bar chart. ">
+
+.. only:: html
+
+ .. figure:: /auto_examples/grouped_bar/images/thumb/sphx_glr_plot_grouped_bar_rick_thumb.png
+     :alt: RICK Grouped Bar Chart
+
+     :ref:`sphx_glr_auto_examples_grouped_bar_plot_grouped_bar_rick.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/grouped_bar/plot_grouped_bar_rick
+.. raw:: html
+
+    <div class="sphx-glr-clear"></div>
+
+
+
 .. _sphx_glr_auto_examples_line:
 
 Line Charts
@@ -81,8 +119,8 @@ Line Charts
 
 Below is a gallery of line charts. 
 
-- plot_line_rick.py: derives from the RICK package with source code in `rick.py`.
-- plot_line_activeto.py: developed for activeTO with source code inside the example. 
+- RICK Line Chart: derives from the RICK package with source code in `rick.py`.
+- activeTO Line Chart: developed for activeTO with source code inside the example. 
 
 
 

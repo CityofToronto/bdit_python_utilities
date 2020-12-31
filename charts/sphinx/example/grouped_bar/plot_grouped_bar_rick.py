@@ -1,8 +1,8 @@
 """
-Stacked Bar Chart
-==================
+RICK Grouped Bar Chart
+=======================
 
-Makes an example of a stacked bar chart.
+Example of a horizontal grouped bar chart.
 """
 
 from sqlalchemy import create_engine
@@ -28,7 +28,8 @@ import matplotlib.font_manager as font_manager
 
 
 CONFIG = configparser.ConfigParser()
-CONFIG.read(r'C:\Users\rliu4\Documents\Python\config.cfg')
+# CONFIG.read(r'C:\Users\rliu4\Documents\Python\config.cfg')
+CONFIG.read(r'/home/cnangini/db.cfg')
 dbset = CONFIG['DBSETTINGS']
 con = connect(**dbset)
 ################################
