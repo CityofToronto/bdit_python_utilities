@@ -69,9 +69,12 @@ class geo:
         # ttc = ttc.to_crs({'init' :'epsg:3857'})
         ttc = ttc.to_crs(epsg=3857)
         
-        for index, row in ttc.iterrows():
-            rotated = shapely.affinity.rotate(row['geom'], angle=-17, origin = Point(0, 0))
-            ttc.loc[index, 'geom'] = rotated  
+        # Below can be replaced by an apply lambda
+        # in case one row is of a different type (e.g. MULTIPOLYGON vs POLYGON)
+        #for index, row in ttc.iterrows():
+        #    rotated = shapely.affinity.rotate(row['geom'], angle=-17, origin = Point(0, 0))
+        #    ttc.loc[index, 'geom'] = rotated  
+        ttc['geom']=ttc['geom'].apply(lambda x: shapely.affinity.rotate(x, angle=-17, origin = Point(0, 0)))
         
         return ttc
     
@@ -104,9 +107,12 @@ class geo:
         # island  = island.to_crs({'init' :'epsg:3857'})
         island  = island.to_crs(epsg=3857)
 
-        for index, row in island.iterrows():
-            rotated = shapely.affinity.rotate(row['geom'], angle=-17, origin = Point(0, 0)) 
-            island.loc[index, 'geom'] = rotated
+        # Below can be replaced by an apply lambda
+        # in case one row is of a different type (e.g. MULTIPOLYGON vs POLYGON)
+        #for index, row in island.iterrows():
+        #    rotated = shapely.affinity.rotate(row['geom'], angle=-17, origin = Point(0, 0)) 
+        #    island.loc[index, 'geom'] = rotated
+        island['geom']=island['geom'].apply(lambda x: shapely.affinity.rotate(x, angle=-17, origin = Point(0, 0)))
 
         return island
     
