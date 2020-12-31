@@ -36,6 +36,41 @@ Below is a gallery of example charts for each charting function in rick.charts.
 
 
 
+.. _sphx_glr_auto_examples_bar:
+
+Bar Charts
+==========
+
+Below is a gallery of bar charts created by BDITTO. 
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Makes an example of a bar chart. ">
+
+.. only:: html
+
+ .. figure:: /auto_examples/bar/images/thumb/sphx_glr_plot_bar_thumb.png
+     :alt: Bar Chart
+
+     :ref:`sphx_glr_auto_examples_bar_plot_bar.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/bar/plot_bar
+.. raw:: html
+
+    <div class="sphx-glr-clear"></div>
+
+
+
 .. only :: html
 
  .. container:: sphx-glr-footer
