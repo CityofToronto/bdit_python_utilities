@@ -41,7 +41,10 @@ Below is a gallery of example charts for each charting function in rick.charts.
 Bar Charts
 ==========
 
-Below is a gallery of bar charts created by BDITTO. 
+Below is a gallery of bar charts. 
+
+- plot_bar_rick.py: derives from the RICK package with source code in `rick.py`.
+- plot_bar_activeto.py: developed for activeTO with source code inside the example. 
 
 
 
@@ -51,10 +54,10 @@ Below is a gallery of bar charts created by BDITTO.
 
 .. only:: html
 
- .. figure:: /auto_examples/bar/images/thumb/sphx_glr_plot_bar_thumb.png
+ .. figure:: /auto_examples/bar/images/thumb/sphx_glr_plot_bar_rick_thumb.png
      :alt: Bar Chart
 
-     :ref:`sphx_glr_auto_examples_bar_plot_bar.py`
+     :ref:`sphx_glr_auto_examples_bar_plot_bar_rick.py`
 
 .. raw:: html
 
@@ -64,7 +67,45 @@ Below is a gallery of bar charts created by BDITTO.
 .. toctree::
    :hidden:
 
-   /auto_examples/bar/plot_bar
+   /auto_examples/bar/plot_bar_rick
+.. raw:: html
+
+    <div class="sphx-glr-clear"></div>
+
+
+
+.. _sphx_glr_auto_examples_line:
+
+Line Charts
+==========
+
+Below is a gallery of line charts. 
+
+- plot_line_rick.py: derives from the RICK package with source code in `rick.py`.
+- plot_line_activeto.py: developed for activeTO with source code inside the example. 
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Makes an example of a line chart, with an additional baseline plot and custom formatted x axis....">
+
+.. only:: html
+
+ .. figure:: /auto_examples/line/images/thumb/sphx_glr_plot_line_rick_thumb.png
+     :alt: Line Chart
+
+     :ref:`sphx_glr_auto_examples_line_plot_line_rick.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/line/plot_line_rick
 .. raw:: html
 
     <div class="sphx-glr-clear"></div>

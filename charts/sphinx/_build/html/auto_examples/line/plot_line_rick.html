@@ -18,6 +18,7 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
+    <link rel="prev" title="Bar Chart" href="../bar/plot_bar_rick.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -36,11 +37,11 @@
             
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
-<p>Click <a class="reference internal" href="#sphx-glr-download-auto-examples-line-plot-line-py"><span class="std std-ref">here</span></a>
+<p>Click <a class="reference internal" href="#sphx-glr-download-auto-examples-line-plot-line-rick-py"><span class="std std-ref">here</span></a>
 to download the full example code</p>
 </div>
 <div class="sphx-glr-example-title section" id="line-chart">
-<span id="sphx-glr-auto-examples-line-plot-line-py"></span><h1>Line Chart<a class="headerlink" href="#line-chart" title="Permalink to this headline">¶</a></h1>
+<span id="sphx-glr-auto-examples-line-plot-line-rick-py"></span><h1>Line Chart<a class="headerlink" href="#line-chart" title="Permalink to this headline">¶</a></h1>
 <p>Makes an example of a line chart, with an additional baseline plot and custom formatted x axis.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="kn">import</span> <span class="n">create_engine</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -58,14 +59,14 @@ to download the full example code</p>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">shapely</span>
 <span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">Point</span>
-<span class="c1">#os.environ[&quot;PROJ_LIB&quot;]=r&quot;C:\Users\rliu4\AppData\Local\Continuum\anaconda3\Library\share&quot;</span>
+<span class="c1"># os.environ[&quot;PROJ_LIB&quot;]=r&quot;C:\Users\rliu4\AppData\Local\Continuum\anaconda3\Library\share&quot;</span>
 <span class="kn">import</span> <span class="nn">importlib</span>
 <span class="kn">import</span> <span class="nn">matplotlib.ticker</span> <span class="k">as</span> <span class="nn">ticker</span>
 <span class="kn">import</span> <span class="nn">matplotlib.font_manager</span> <span class="k">as</span> <span class="nn">font_manager</span>
 
 
 <span class="n">CONFIG</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
-<span class="c1">#CONFIG.read(r&#39;C:\Users\rliu4\Documents\Python\config.cfg&#39;)</span>
+<span class="c1"># CONFIG.read(r&#39;C:\Users\rliu4\Documents\Python\config.cfg&#39;)</span>
 <span class="n">CONFIG</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;/home/cnangini/db.cfg&#39;</span><span class="p">)</span>
 <span class="n">dbset</span> <span class="o">=</span> <span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;DBSETTINGS&#39;</span><span class="p">]</span>
 <span class="n">con</span> <span class="o">=</span> <span class="n">connect</span><span class="p">(</span><span class="o">**</span><span class="n">dbset</span><span class="p">)</span>
@@ -76,19 +77,17 @@ to download the full example code</p>
 <p>This Section grabs and formats the data.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">query</span><span class="o">=</span><span class="s1">&#39;&#39;&#39;</span>
 <span class="s1">WITH daily_ave AS (</span>
-
-<span class="s1">SELECT * FROM ptc.daily_trips</span>
+<span class="s1">   SELECT * FROM ptc.daily_trips</span>
 <span class="s1">), total AS  (</span>
-<span class="s1">SELECT  extract(month from pickup_datetime) as mon,</span>
-<span class="s1">extract(year from pickup_datetime) as yr,</span>
+<span class="s1">SELECT  extract(month from dt) as mon,</span>
+<span class="s1">extract(year from dt) as yr,</span>
 
-<span class="s1">CASE WHEN extract(year from pickup_datetime) = 2018 AND extract(month from pickup_datetime) IN (3) THEN 108321</span>
-<span class="s1">WHEN extract(year from pickup_datetime) = 2018 AND extract(month from pickup_datetime) IN (11) THEN 161733 ELSE</span>
+<span class="s1">CASE WHEN extract(year from dt) = 2018 AND extract(month from dt) IN (3) THEN 108321</span>
+<span class="s1">WHEN extract(year from dt) = 2018 AND extract(month from dt) IN (11) THEN 161733 ELSE</span>
 <span class="s1">avg(count)::integer END as count FROM daily_ave</span>
-<span class="s1">GROUP BY extract(month from pickup_datetime), extract(year from pickup_datetime)</span>
-<span class="s1">ORDER BY extract(year from pickup_datetime), extract(month from pickup_datetime)</span>
+<span class="s1">GROUP BY extract(month from dt), extract(year from dt)</span>
+<span class="s1">ORDER BY extract(year from dt), extract(month from dt)</span>
 <span class="s1">)</span>
-
 
 <span class="s1">SELECT</span>
 <span class="s1">CASE WHEN mon = 1 THEN to_char(to_timestamp (mon::text, &#39;MM&#39;), &#39;Mon&#39;)||&#39; &#39;||yr::text</span>
@@ -100,78 +99,39 @@ to download the full example code</p>
 <span class="n">total</span><span class="o">=</span><span class="n">pandasql</span><span class="o">.</span><span class="n">read_sql</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">con</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-pytb notranslate"><div class="highlight"><pre><span></span><span class="gt">Traceback (most recent call last):</span>
-  File <span class="nb">&quot;/home/cnangini/PROJECTS/bdit_python_utilities/charts/sphinx/example/line/plot_line.py&quot;</span>, line <span class="m">64</span>, in <span class="n">&lt;module&gt;</span>
-    <span class="n">total</span><span class="o">=</span><span class="n">pandasql</span><span class="o">.</span><span class="n">read_sql</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">con</span><span class="p">)</span>
-  File <span class="nb">&quot;/etc/jupyterhub/.venv/lib/python3.5/site-packages/pandas/io/sql.py&quot;</span>, line <span class="m">380</span>, in <span class="n">read_sql</span>
-    <span class="n">chunksize</span><span class="o">=</span><span class="n">chunksize</span><span class="p">)</span>
-  File <span class="nb">&quot;/etc/jupyterhub/.venv/lib/python3.5/site-packages/pandas/io/sql.py&quot;</span>, line <span class="m">1468</span>, in <span class="n">read_query</span>
-    <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
-  File <span class="nb">&quot;/etc/jupyterhub/.venv/lib/python3.5/site-packages/pandas/io/sql.py&quot;</span>, line <span class="m">1445</span>, in <span class="n">execute</span>
-    <span class="n">raise_with_traceback</span><span class="p">(</span><span class="n">ex</span><span class="p">)</span>
-  File <span class="nb">&quot;/etc/jupyterhub/.venv/lib/python3.5/site-packages/pandas/compat/__init__.py&quot;</span>, line <span class="m">420</span>, in <span class="n">raise_with_traceback</span>
-    <span class="k">raise</span> <span class="n">exc</span><span class="o">.</span><span class="n">with_traceback</span><span class="p">(</span><span class="n">traceback</span><span class="p">)</span>
-  File <span class="nb">&quot;/etc/jupyterhub/.venv/lib/python3.5/site-packages/pandas/io/sql.py&quot;</span>, line <span class="m">1431</span>, in <span class="n">execute</span>
-    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
-<span class="gr">pandas.io.sql.DatabaseError</span>: <span class="n">Execution failed on sql &#39;</span>
-<span class="x">WITH daily_ave AS (</span>
-
-<span class="x">SELECT * FROM ptc.daily_trips</span>
-<span class="x">), total AS  (</span>
-<span class="x">SELECT  extract(month from pickup_datetime) as mon,</span>
-<span class="x">extract(year from pickup_datetime) as yr,</span>
-
-<span class="x">CASE WHEN extract(year from pickup_datetime) = 2018 AND extract(month from pickup_datetime) IN (3) THEN 108321</span>
-<span class="x">WHEN extract(year from pickup_datetime) = 2018 AND extract(month from pickup_datetime) IN (11) THEN 161733 ELSE</span>
-<span class="x">avg(count)::integer END as count FROM daily_ave</span>
-<span class="x">GROUP BY extract(month from pickup_datetime), extract(year from pickup_datetime)</span>
-<span class="x">ORDER BY extract(year from pickup_datetime), extract(month from pickup_datetime)</span>
-<span class="x">)</span>
-
-
-<span class="x">SELECT</span>
-<span class="x">CASE WHEN mon = 1 THEN to_char(to_timestamp (mon::text, &#39;MM&#39;), &#39;Mon&#39;)||&#39; &#39;||yr::text</span>
-<span class="x">WHEN mon = 9 AND yr = 2016 THEN to_char(to_timestamp (mon::text, &#39;MM&#39;), &#39;Mon&#39;)||&#39; &#39;||yr::text</span>
-<span class="x">ELSE to_char(to_timestamp (mon::text, &#39;MM&#39;), &#39;Mon&#39;)</span>
-<span class="x">END AS period,</span>
-<span class="x">count FROM total</span>
-<span class="x">&#39;: column &quot;pickup_datetime&quot; does not exist</span>
-<span class="x">LINE 6: SELECT  extract(month from pickup_datetime) as mon,</span>
-<span class="x">                                   ^</span>
-</pre></div>
-</div>
 <p>Gets the baseline data (to be graphed in grey)</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">query</span><span class="o">=</span><span class="s1">&#39;&#39;&#39;</span>
 <span class="s1">WITH daily_ave AS (</span>
-
 <span class="s1">SELECT * FROM ptc.daily_trips</span>
 <span class="s1">), total AS  (</span>
-<span class="s1">SELECT  extract(month from pickup_datetime) as mon,</span>
-<span class="s1">extract(year from pickup_datetime) as yr,</span>
-
-<span class="s1">CASE WHEN extract(year from pickup_datetime) = 2018 AND extract(month from pickup_datetime) IN (3) THEN 108321</span>
-<span class="s1">WHEN extract(year from pickup_datetime) = 2018 AND extract(month from pickup_datetime) IN (11) THEN 161733 ELSE</span>
-<span class="s1">avg(count)::integer END as count FROM daily_ave</span>
-<span class="s1">GROUP BY extract(month from pickup_datetime), extract(year from pickup_datetime)</span>
-<span class="s1">ORDER BY extract(year from pickup_datetime), extract(month from pickup_datetime)</span>
+<span class="s1">SELECT  extract(month from dt) as mon,</span>
+<span class="s1">EXTRACT(year from dt) as yr,</span>
+<span class="s1">CASE WHEN extract(year from dt) = 2018 AND extract(month from dt) IN (3) THEN 108321</span>
+<span class="s1">WHEN extract(year from dt) = 2018 AND extract(month from dt) IN (11) THEN 161733 ELSE</span>
+<span class="s1">AVG(count)::integer END AS count FROM daily_ave</span>
+<span class="s1">GROUP BY EXTRACT(month from dt), EXTRACT(year from dt)</span>
+<span class="s1">ORDER BY EXTRACT(year from dt), EXTRACT(month from dt)</span>
 <span class="s1">)</span>
-
-
 <span class="s1">SELECT</span>
 <span class="s1">CASE WHEN mon = 1 THEN to_char(to_timestamp (mon::text, &#39;MM&#39;), &#39;Mon&#39;)||&#39; &#39;||yr::text</span>
 <span class="s1">WHEN mon = 9 AND yr = 2016 THEN to_char(to_timestamp (mon::text, &#39;MM&#39;), &#39;Mon&#39;)||&#39; &#39;||yr::text</span>
 <span class="s1">ELSE to_char(to_timestamp (mon::text, &#39;MM&#39;), &#39;Mon&#39;)</span>
 <span class="s1">END AS period,</span>
-<span class="s1">count/2 as count FROM total</span>
+<span class="s1">count/2 AS count FROM total</span>
 <span class="s1">&#39;&#39;&#39;</span>
 <span class="n">total2</span><span class="o">=</span><span class="n">pandasql</span><span class="o">.</span><span class="n">read_sql</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">con</span><span class="p">)</span>
 
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">props</span> <span class="o">=</span> <span class="n">rick</span><span class="o">.</span><span class="n">charts</span><span class="o">.</span><span class="n">line_chart</span><span class="p">(</span><span class="n">total</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">],</span> <span class="s1">&#39;Trips&#39;</span><span class="p">,</span> <span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">baseline</span> <span class="o">=</span> <span class="n">total2</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
+<img alt="plot line rick" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_line_rick_001.png" />
 <p>Adds annotations</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.94</span><span class="p">,</span> <span class="mf">0.96</span><span class="p">,</span> <span class="s1">&#39;176,000&#39;</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span> <span class="n">wrap</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">fontname</span> <span class="o">=</span> <span class="s1">&#39;Libre Franklin&#39;</span><span class="p">,</span>
          <span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">ha</span> <span class="o">=</span> <span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="n">props</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;#660159&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Text(0.94, 0.96, &#39;176,000&#39;)
 </pre></div>
 </div>
 <p>Adds custom x axis</p>
@@ -181,13 +141,18 @@ to download the full example code</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">35</span><span class="p">,</span><span class="mi">4</span><span class="p">),</span> <span class="n">month_lst2</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">fontname</span> <span class="o">=</span> <span class="s1">&#39;Libre Franklin&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  1.246 seconds)</p>
-<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-line-plot-line-py">
+<img alt="plot line rick" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_line_rick_002.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>([&lt;matplotlib.axis.XTick object at 0x7f91ca455390&gt;, &lt;matplotlib.axis.XTick object at 0x7f91cad10be0&gt;, &lt;matplotlib.axis.XTick object at 0x7f91cad10940&gt;, &lt;matplotlib.axis.XTick object at 0x7f91ca466748&gt;, &lt;matplotlib.axis.XTick object at 0x7f91ca466c18&gt;, &lt;matplotlib.axis.XTick object at 0x7f91ca466f60&gt;, &lt;matplotlib.axis.XTick object at 0x7f91ca46a4a8&gt;, &lt;matplotlib.axis.XTick object at 0x7f91ca46a9b0&gt;, &lt;matplotlib.axis.XTick object at 0x7f91ca46aeb8&gt;], &lt;a list of 9 Text xticklabel objects&gt;)
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.213 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-line-plot-line-rick-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
-<p><a class="reference download internal" download="" href="../../_downloads/99718e368a206998d5460ffd18e96caa/plot_line.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_line.py</span></code></a></p>
+<p><a class="reference download internal" download="" href="../../_downloads/557eb1192c61267ac4f53a876c525bc1/plot_line_rick.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_line_rick.py</span></code></a></p>
 </div>
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
-<p><a class="reference download internal" download="" href="../../_downloads/f140502f6a1ee1392b0f86a84b5bfff6/plot_line.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_line.ipynb</span></code></a></p>
+<p><a class="reference download internal" download="" href="../../_downloads/2f0c33f135fb7bda3c390bd9302bfc8d/plot_line_rick.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_line_rick.ipynb</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
@@ -204,6 +169,9 @@ to download the full example code</p>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Gallery of Charts</a><ul>
+      <li>Previous: <a href="../bar/plot_bar_rick.html" title="previous chapter">Bar Chart</a></li>
+  </ul></li>
   </ul></li>
 </ul>
 </div>
@@ -229,7 +197,7 @@ to download the full example code</p>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
-      <a href="../../_sources/auto_examples/line/plot_line.rst.txt"
+      <a href="../../_sources/auto_examples/line/plot_line_rick.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 
