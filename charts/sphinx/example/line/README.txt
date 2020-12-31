@@ -1,7 +1,9 @@
 Line Charts
 ===========
 
-## Test heading
+*********
+Sample H2
+*********
 
 Below is a gallery of line charts. 
 
