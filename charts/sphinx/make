@@ -1,0 +1,38 @@
+Running Sphinx v2.1.2
+loading pickled environment... done
+generating gallery...
+generating gallery for auto_examples... [ 50%] plot_chloropleth.py             generating gallery for auto_examples... [100%] plot_line.py                    
+computation time summary:
+    - example\plot_line.py: 0 sec
+    - example\plot_chloropleth.py: 0 sec
+building [mo]: targets for 0 po files that are out of date
+building [html]: targets for 0 source files that are out of date
+updating environment: [] 0 added, 2 changed, 0 removed
+reading sources... [ 50%] auto_examples/index                                  reading sources... [100%] auto_examples/plot_chloropleth                       
+looking for now-outdated files... none found
+pickling environment... done
+checking consistency... done
+preparing documents... done
+writing output... [ 33%] auto_examples/index                                   writing output... [ 66%] auto_examples/plot_chloropleth                        writing output... [100%] index                                                 
+generating indices... genindex py-modindex
+highlighting module code... [100%] rick                                        
+writing additional pages... search
+copying images... [ 33%] auto_examples/images/thumb/sphx_glr_plot_chloropleth_thumb.pngcopying images... [ 66%] auto_examples/images/thumb/sphx_glr_plot_line_thumb.pngcopying images... [100%] auto_examples/images/sphx_glr_plot_chloropleth_001.png
+copying downloadable files... [ 16%] auto_examples/plot_line.py                copying downloadable files... [ 33%] auto_examples/plot_line.ipynb             copying downloadable files... [ 50%] auto_examples/auto_examples_python.zip    copying downloadable files... [ 66%] auto_examples/auto_examples_jupyter.zip   copying downloadable files... [ 83%] auto_examples/plot_chloropleth.py         copying downloadable files... [100%] auto_examples/plot_chloropleth.ipynb      
+copying static files... done
+copying extra files... done
+dumping search index in English (code: en) ... done
+dumping object inventory... done
+build succeeded.
+
+The HTML pages are in _build\html.
+
+Sphinx-gallery successfully executed 0 out of 0 files subselected by:
+
+    gallery_conf["filename_pattern"] = '\\\\plot'
+    gallery_conf["ignore_pattern"]   = '__init__\\.py'
+
+after excluding 2 files that had previously been run (based on MD5).
+
+embedding documentation hyperlinks...
+embedding documentation hyperlinks for auto_examples... [ 25%] index.html      embedding documentation hyperlinks for auto_examples... [ 50%] plot_chloropleth.htmlembedding documentation hyperlinks for auto_examples... [ 75%] plot_line.html  embedding documentation hyperlinks for auto_examples... [100%] sg_execution_times.html
