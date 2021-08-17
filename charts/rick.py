@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+#!/usr/bin/env python
 """
 Version 0.8.0 
 
-
 """
+
 from psycopg2 import connect
 import psycopg2.sql as pg
 import pandas.io.sql as pandasql
@@ -11,12 +12,12 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import matplotlib.ticker as ticker
+import matplotlib.font_manager as font_manager
 import geopandas as gpd
 import os
 import shapely
 import seaborn as sns
 from shapely.geometry import Point
-import matplotlib.font_manager as font_manager
 import numpy as np
 
 class font:
@@ -66,11 +67,15 @@ class geo:
         
         '''
         ttc = gpd.GeoDataFrame.from_postgis(query, con, geom_col='geom')
-        ttc = ttc.to_crs({'init' :'epsg:3857'})
+        # ttc = ttc.to_crs({'init' :'epsg:3857'})
+        ttc = ttc.to_crs(epsg=3857)
         
-        for index, row in ttc.iterrows():
-            rotated = shapely.affinity.rotate(row['geom'], angle=-17, origin = Point(0, 0))
-            ttc.loc[index, 'geom'] = rotated  
+        # Below can be replaced by an apply lambda
+        # in case one row is of a different type (e.g. MULTIPOLYGON vs POLYGON)
+        #for index, row in ttc.iterrows():
+        #    rotated = shapely.affinity.rotate(row['geom'], angle=-17, origin = Point(0, 0))
+        #    ttc.loc[index, 'geom'] = rotated  
+        ttc['geom']=ttc['geom'].apply(lambda x: shapely.affinity.rotate(x, angle=-17, origin = Point(0, 0)))
         
         return ttc
     
@@ -100,11 +105,15 @@ class geo:
         '''
 
         island =  gpd.GeoDataFrame.from_postgis(query, con, geom_col='geom')
-        island  = island.to_crs({'init' :'epsg:3857'})
+        # island  = island.to_crs({'init' :'epsg:3857'})
+        island  = island.to_crs(epsg=3857)
 
-        for index, row in island.iterrows():
-            rotated = shapely.affinity.rotate(row['geom'], angle=-17, origin = Point(0, 0)) 
-            island.loc[index, 'geom'] = rotated
+        # Below can be replaced by an apply lambda
+        # in case one row is of a different type (e.g. MULTIPOLYGON vs POLYGON)
+        #for index, row in island.iterrows():
+        #    rotated = shapely.affinity.rotate(row['geom'], angle=-17, origin = Point(0, 0)) 
+        #    island.loc[index, 'geom'] = rotated
+        island['geom']=island['geom'].apply(lambda x: shapely.affinity.rotate(x, angle=-17, origin = Point(0, 0)))
 
         return island
     
@@ -239,6 +248,8 @@ class charts:
             Label for the y axis.
         xlab : str
             Label for the x axis.
+        xticker_labels : array, optional, with ticker identifications
+            Tickers for the x axis. 
         ymax : int, optional, default is the max y value
             The max value of the y axis
         ymin : int, optional, default is 0
@@ -263,6 +274,7 @@ class charts:
         ymax = kwargs.get('ymax', int(data.max()))
         ymin = kwargs.get('ymin', 0)
         baseline = kwargs.get('baseline', None)
+        xticker_labels = kwargs.get('xticker_labels', None)
         
         delta = (ymax - ymin)/4
         i = 0
@@ -274,13 +286,13 @@ class charts:
         yinc = kwargs.get('yinc', int(round(delta+1)*pow(10,i)))
         
         fig, ax =plt.subplots()
-        ax.plot(data ,linewidth=3, color = colour.purple)
+        ax.plot(data, linewidth=3, color = colour.purple)
         if baseline is not None:
             ax.plot(baseline ,linewidth=3, color = colour.grey)
 
         plt.grid()
         ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-
+        
         ax.set_facecolor('xkcd:white')
 
         plt.xlabel(xlab, fontsize=9, fontweight = 'bold', horizontalalignment='right', x=0, labelpad=10, 
@@ -290,10 +302,18 @@ class charts:
                    horizontalalignment='right', y=1.0, 
                    labelpad=10, fontname = font.normal)
         fig.set_size_inches(6.1, 4.1)
-        plt.xticks(fontsize=9, fontname = font.normal)
+        #plt.xticks(fontsize=9, fontname = font.normal)
         plt.yticks(range(ymin, ymax + yinc, yinc), fontsize =9,
                    fontname = font.normal)
 
+        if (xticker_labels is not None):
+            list_major_labels = xticker_labels
+            list_major_ticks  = np.arange(0, len(list_major_labels), 1)
+            ax.xaxis.set_major_locator(ticker.FixedLocator(list_major_ticks))
+            ax.xaxis.set_major_formatter(ticker.FixedFormatter(list_major_labels))
+            ax.tick_params(axis='x', which='major', colors = colour.light_grey, labelsize=7)
+#             ax.set_xticklabels(list_major_labels)        
+        
         props = dict(boxstyle='round, pad=0.4',edgecolor=colour.purple,
                      linewidth = 2, facecolor = 'w', alpha=1)
 
@@ -304,7 +324,7 @@ class charts:
     
     def tow_chart(data, ylab, **kwargs):
         """Creates a 7 day time of week line chart. Each data point represents 1 hour out of 168 hours.
-        
+
         Parameters
         -----------
         data : array like or scalar
@@ -317,7 +337,7 @@ class charts:
             The minimum value of the y axis
         yinc : int, optional
             The increment of ticks on the y axis.
-        
+
         Returns 
         --------
         fig
@@ -326,18 +346,25 @@ class charts:
             Matplotlib ax object
         props
             Dictionary of the text annotation properties
-            
+
         """
+        import matplotlib.pyplot as plt
+        import matplotlib as mpl
+        import importlib
+        import matplotlib.ticker as ticker
+        import matplotlib.font_manager as font_manager
+        import seaborn as sns
+
         func()
         ymax = kwargs.get('ymax', None)
         ymin = kwargs.get('ymin', 0)
-        
-        
+
+
         ymax_flag = True
         if ymax == None:
             ymax = int(data.max())
             ymax_flag = False
-        
+
         delta = (ymax - ymin)/3
         i = 0
         while True:
@@ -346,16 +373,17 @@ class charts:
             if delta < 10:
                 break
         yinc = kwargs.get('yinc', int(round(delta+1)*pow(10,i)))
-        
+
         if ymax_flag == True:
             upper = ymax
         else:
             upper = int(3*yinc+ymin)
-        
-        fig, ax =plt.subplots()
+
+        fig, ax = plt.subplots()
         ax.plot(data, linewidth = 2.5, color = colour.purple)
 
-        plt.grid()
+        # Commented to view weekday spans 
+        #plt.grid()
         ax.set_facecolor('xkcd:white')
 
         plt.xlabel('Time of week', fontname = font.normal, fontsize=9, horizontalalignment='left', x=0, labelpad=3, fontweight = 'bold')
@@ -365,24 +393,35 @@ class charts:
         plt.ylabel(ylab, fontname = font.normal, fontsize=9, horizontalalignment='right', y=1, labelpad=7, fontweight = 'bold')
         fig.set_size_inches(6.1, 1.8)
 
-
         ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
         plt.yticks(range(ymin,upper+int(0.1*yinc), yinc), fontsize =9, fontname = font.normal)
 
-        ax.set_xticks(range(0,180,12))
-        ax.set_xticklabels(['0','12','0','12',
-                                                            '0','12','0','12',
-                                         '0','12','0','12','0','12'], fontname = font.normal, fontsize = 7, color = colour.light_grey)
+        list_major_ticks  = np.arange(0, 180, 12)
+        list_major_labels = ['0','12','0','12','0','12','0','12','0','12','0','12','0','12','0']
+        ax.xaxis.set_major_locator(ticker.FixedLocator(list_major_ticks))
+        ax.xaxis.set_major_formatter(ticker.FixedFormatter(list_major_labels))
+        ax.tick_params(axis='x', which='major', colors = colour.light_grey, labelsize=7)
 
-        ax.xaxis.set_minor_locator(ticker.FixedLocator(list(range(12,180,24))))
-        ax.xaxis.set_minor_formatter(ticker.FixedFormatter(['Monday','Tuesday',
-                                                            'Wednesday','Thursday',
-                                         'Friday','Saturday','Sunday']))
-        ax.tick_params(axis='x', which='minor', colors = 'k', labelsize=9, pad =14)
+        list_minor_ticks  = np.arange(0, 180, 24)
+        list_minor_labels = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
+        # Minor ticks location isn't being set correctly with below
+        #ax.xaxis.set_minor_locator(ticker.FixedLocator(list_minor_ticks))
+        #ax.xaxis.set_minor_formatter(ticker.FixedFormatter(list_minor_labels))
+        #ax.tick_params(axis='x', which='minor', colors = 'k', labelsize=9, pad =14)
+        #ax.minorticks_on()
+
+        # Weekday colors (Ref:https://blog.forret.com/2007/08/21/weekday-colours-ayurveda/)
+        list_colors_of_the_week = ['#FFFAF0', '#CD5C5C', '#32CD32', '#FFFFE0', '#F0F8FF', '#663399', '#800000']
+
+        # Spans for DOW
+        for icolor in range(len(list_colors_of_the_week)):
+            ax.axvspan(list_minor_ticks[icolor], list_minor_ticks[icolor+1], color=list_colors_of_the_week[icolor], alpha=0.12, lw=0)
+            ax.axvline(x=list_minor_ticks[icolor+1], linewidth=0.25, color='#000000')
+            ax.text(np.mean([list_minor_ticks[icolor], list_minor_ticks[icolor+1]]) - len(list_minor_labels[icolor]), ymax-yinc, list_minor_labels[icolor], fontsize=7)
 
         props = dict(boxstyle='round, pad=0.3',edgecolor=colour.purple, linewidth = 1.5, facecolor = 'w', alpha=1)
 
-        ax.set_xlim([0,167])
+        ax.set_xlim(0, 167)
         return fig, ax, props
 
     def stacked_chart(data_in, xlab, lab1, lab2, **kwargs):
