@@ -12,7 +12,7 @@ con = connect(**dbset)
 ######################
 ##schema name goes here
 ######################
-schema_name = 'rescu'
+schema_name = 'wys'
 
 #find table names from information_schema.tables
 table_sql = '''
@@ -41,6 +41,23 @@ LIMIT 1;
 rowcount_sql = '''
 SELECT COUNT(1)
 FROM {}.{};
+'''
+
+column_comments_sql = '''
+    SELECT
+        c.column_name,
+        pgd.description
+    FROM pg_catalog.pg_statio_all_tables AS st
+    INNER JOIN pg_catalog.pg_description AS pgd ON (
+        pgd.objoid = st.relid
+    )
+    INNER JOIN information_schema.columns AS c ON (
+        pgd.objsubid = c.ordinal_position 
+        AND c.table_schema = st.schemaname
+        AND c.table_name = st.relname
+    )
+    WHERE c.table_schema = '{}' 
+        AND c.table_name = '{}';
 '''
 
 #create directory if not exists 
@@ -77,9 +94,13 @@ with con:
         #row count        
         row_count = pandas.read_sql(rowcount_sql.format(schema_name, table_name), con)
 
+        #column comments
+        column_comments = pandas.read_sql(column_comments_sql.format(schema_name, table_name), con)
+        
         #merge sample with column types
-        final = column_types.merge(data_sample_T, on = 'column_name')
-        final['Comments'] = '' #blank column for comments
+        final = column_types.merge(data_sample_T, how = 'left', on = 'column_name')
+        final = final.merge(column_comments, how = 'left', on = 'column_name')
+        final['description'] = final['description'].fillna('')
 
         #markdown format for github
         final_formatted = final.to_markdown(index = False)
