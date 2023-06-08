@@ -12,7 +12,8 @@ con = connect(**dbset)
 ######################
 ##schema name goes here
 ######################
-schema_name = 'wys'
+schema_name = 'miovision_api'
+row_count_on = True #change to false to omit row counts (can be very slow on certain schemas)
 
 #find table names from information_schema.tables
 table_sql = '''
@@ -91,10 +92,11 @@ with con:
         data_sample_T["column_name"] = data_sample_T.index
         data_sample_T.rename(columns= {0: "sample"}, inplace=True)
 
-        #row count        
-        row_count = pandas.read_sql(rowcount_sql.format(schema_name, table_name), con)
+        #row count 
+        if row_count_on: 
+            row_count = pandas.read_sql(rowcount_sql.format(schema_name, table_name), con)
 
-        #column comments
+        #column comments --tested with miovision_api (has 3 column comments)
         column_comments = pandas.read_sql(column_comments_sql.format(schema_name, table_name), con)
         
         #merge sample with column types
@@ -110,7 +112,7 @@ with con:
 
         #write formatted output with table name as header        
         with open(fname, "a") as file: #append
-            file.write("{}.{}\n".format(schema_name, table_name) + 
-                       "Row count: {:,}\n".format(row_count['count'][0]) +
-                       final_formatted + 
-                       "\n\n")
+            file.write("{}.{}\n".format(schema_name, table_name))
+            if(row_count_on): 
+                file.write("Row count: {:,}\n".format(row_count['count'][0]))
+            file.write(final_formatted + "\n\n")
