@@ -4,16 +4,20 @@ from pathlib import Path
 import configparser
 from psycopg2 import connect
 
+home_dir = os.path.expanduser('~')
+    
 CONFIG = configparser.ConfigParser()
-CONFIG.read(str(Path.home().joinpath('db.cfg'))) #Creates a path to your db.cfg file
+CONFIG.read(os.path.join(home_dir, 'db.cfg')) #Creates a path to your db.cfg file
 dbset = CONFIG['DBSETTINGS']
 con = connect(**dbset)
 
 ######################
 ##schema name goes here
 ######################
-schema_name = 'miovision_api'
-row_count_on = True #change to false to omit row counts (can be very slow on certain schemas)
+schema_name = input("Input schema name to generate schema readme for:")  
+#schema_name = 'rescu'
+row_count_on = input("Row count on? (True/False) Can be slow for certain schemas.")
+#row_count_on = True #change to false to omit row counts (can be very slow on certain schemas)
 
 #find table names from information_schema.tables
 table_sql = '''
@@ -63,7 +67,7 @@ column_comments_sql = '''
 
 #create directory if not exists 
 #home folder
-dir = "bigdata_schema_readmes"
+dir = home_dir + "/bigdata_schema_readmes"
 if os.path.exists(dir) is False:
     os.mkdir(dir)
     print("Creating directory: {}".format(dir))
@@ -73,6 +77,8 @@ fname = dir + "/{}_readme.txt".format(schema_name)
 if os.path.isfile(fname):
     os.remove(fname)
 
+print("Destination path: " + fname)
+    
 with con:
     #identify tables within schema
     tables = pandas.read_sql(table_sql.format(schema_name), con)
