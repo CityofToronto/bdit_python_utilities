@@ -77,7 +77,7 @@ columns_sql = sql.text('''
 SELECT
     a.attname AS "Column Name", 
     d.description AS "Comments",
-    pg_catalog.format_type(a.atttypid, a.atttypmod) as "Data type"
+    pg_catalog.format_type(a.atttypid, a.atttypmod) as "Data Type"
 FROM pg_class AS c
 JOIN pg_attribute AS a ON c.oid = a.attrelid
 JOIN pg_namespace AS n ON n.oid = c.relnamespace
@@ -159,11 +159,9 @@ with engine.connect() as con:
         final.fillna('', inplace=True)
         #markdown format for github
         final_formatted = final.to_markdown(index = False, tablefmt="github")        
-        #print for debugging
-        #print(final_formatted)        
-        #write formatted output with table name as header
         object_type = tables.loc[tables.table_name == table_name, 'table_type'].iloc[0]
         
+        #write formatted output with table name as header
         with open(fname, "a") as file: #append
             file.write(f"### `{schema_name}.{table_name}` ({object_type})\n")
             file.write(f"{table_comment}\n")
