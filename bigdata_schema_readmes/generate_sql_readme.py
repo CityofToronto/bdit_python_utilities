@@ -2,6 +2,7 @@ import pandas as pd
 import os.path
 import configparser
 import sqlalchemy
+from sqlalchemy import sql
 
 home_dir = os.path.expanduser('~')
 
@@ -26,65 +27,79 @@ engine = sqlalchemy.create_engine(url_object)
 ######################
 ##schema name goes here
 ######################
-schema_name = input("Input schema name to generate schema readme for:") 
-#schema_name = 'ecocounter'
-row_count_on = input("Row count on? (True/False) Can be slow for certain schemas.")
-#row_count_on = True #change to false to omit row counts (can be very slow on certain schemas)
+input_schema = input("Input schema name to generate schema readme for:") 
+
+# Parse schema and prefix from input
+try:
+    schema_name, table_prefix = input_schema.split('.')
+except ValueError:
+    schema_name = input_schema
 
 #find table names from information_schema.tables
-table_sql = '''
-SELECT table_name 
-FROM information_schema.tables
-WHERE table_schema = '{}'
-    AND table_type <> 'VIEW';
-'''
+if table_prefix:
+    table_sql = sql.text('''
+    SELECT
+        c.relname AS table_name,
+        CASE c.relkind
+            WHEN 'p' THEN 'partitioned table'
+            WHEN 'r' THEN 'table'
+        END AS table_type
+    FROM pg_catalog.pg_class AS c
+    JOIN pg_catalog.pg_namespace AS n ON n.oid = c.relnamespace
+    WHERE
+        n.nspname = :schema
+        AND c.relname LIKE :prefix
+        -- add more type: https://www.postgresql.org/docs/current/catalog-pg-class.html
+        AND c.relkind = ANY('{p,r}')
+    AND NOT c.relispartition --exclude child partitions
+    ORDER BY 1, 2;
+    ''')
+else:
+    table_sql = sql.text('''
+    SELECT
+        c.relname AS table_name,
+        CASE c.relkind
+            WHEN 'p' THEN 'partitioned table'
+            WHEN 'r' THEN 'table'
+        END AS table_type
+    FROM pg_catalog.pg_class AS c
+    JOIN pg_catalog.pg_namespace AS n ON n.oid = c.relnamespace
+    WHERE
+        n.nspname = :schema
+        -- add more type: https://www.postgresql.org/docs/current/catalog-pg-class.html
+        AND c.relkind = ANY('{p,r}')
+    AND NOT c.relispartition --exclude child partitions
+    ORDER BY 1, 2;
+    ''')
 
 #find column names and types from information_schema.columns
-columns_sql = '''
-SELECT column_name, data_type
-FROM information_schema.columns
-WHERE table_schema = '{}' 
-    AND table_name = '{}';
-'''
-
-column_comments_sql = '''
+columns_sql = sql.text('''
 SELECT
-    a.attname AS column_name, 
-    d.description AS "Comments"
+    a.attname AS "Column Name", 
+    d.description AS "Comments",
+    pg_catalog.format_type(a.atttypid, a.atttypmod) as "Data type"
 FROM pg_class AS c
 JOIN pg_attribute AS a ON c.oid = a.attrelid
 JOIN pg_namespace AS n ON n.oid = c.relnamespace
-JOIN pg_description AS d ON
+LEFT JOIN pg_description AS d ON
     d.objoid = c.oid
     AND d.objsubid = a.attnum
 WHERE
-    n.nspname = '{}'
-    AND c.relname = '{}'
-    AND d.description IS NOT NULL;
-'''
+    n.nspname = :schema
+    AND c.relname = :table
+    AND attisdropped = false
+    AND attnum >= 1;
+''')
 
-table_comments_sql = '''
+table_comments_sql = sql.text('''
 SELECT pgd.description
 FROM pg_description AS pgd
 JOIN pg_class AS pgc ON pgd.objoid = pgc.oid
 JOIN pg_namespace pgn ON pgc.relnamespace = pgn.oid
 WHERE
-    pgn.nspname = '{}'
-    AND pgc.relname = '{}'
-'''
-
-#first row of table as sample
-sample_sql = '''
-SELECT * 
-FROM {}.{}
-LIMIT 1;
-'''
-
-#rowcount 
-rowcount_sql = '''
-SELECT COUNT(1)
-FROM {}.{};
-'''
+    pgn.nspname = :schema
+    AND pgc.relname = :table
+''')
 
 #Don't fail if some columns are not in the dataset.
 #Source: https://stackoverflow.com/a/62658311
@@ -109,31 +124,35 @@ if os.path.isfile(fname):
 
 with engine.connect() as con:
     #identify tables within schema
-    tables = pd.read_sql(table_sql, con, params=(schema_name,))
+    if table_prefix:
+        tables = pd.read_sql_query(table_sql, con, params={'schema': schema_name, 'prefix': f"{table_prefix}%"})
+    else:
+        tables = pd.read_sql_query(table_sql, con, params={'schema': schema_name})
     if tables.empty:
         print("No tables found in schema '{}'".format(schema_name))
     #for each table
     for table_name in tables['table_name']: 
-        print(table_name)
+        print(f"Processing {table_name}...")
         #query columns & datatypes from information_schema
-        column_types = pd.read_sql(columns_sql, con, params=(schema_name, table_name))
-        column_comments = pd.read_sql(column_comments_sql, con, params=(schema_name, table_name))
-        #query sample row from schema.table and transpose 
-        data_sample = pd.read_sql(sample_sql, con, params=(schema_name, table_name))
+        column_types = pd.read_sql_query(columns_sql, con, params={'schema': schema_name, 'table': table_name})
+        #query sample row from schema.table and transpose
+        sample_query = sql.text(f"SELECT * FROM {schema_name}.{table_name} LIMIT 1")
+        data_sample = pd.read_sql_query(sample_query, con)
         data_sample_T = data_sample.T
-        data_sample_T["column_name"] = data_sample_T.index
-        data_sample_T.rename(columns= {0: "sample"}, inplace=True)        
-        table_comments = pd.read_sql(table_comments_sql, con, params=(schema_name, table_name))
+        data_sample_T["Column Name"] = data_sample_T.index
+        data_sample_T.rename(columns= {0: "Sample"}, inplace=True)
+        table_comments = pd.read_sql_query(table_comments_sql, con, params={'schema': schema_name, 'table': table_name})
         try:
             table_comment = table_comments['description'][0]
         except KeyError:
             table_comment = ''
-        #row count 
-        if row_count_on: 
-            row_count = pd.read_sql(rowcount_sql, con, params=(schema_name, table_name))
+        #approx row count
+        rowcount_sql = sql.text(f'''
+        SELECT TO_CHAR(COUNT(1) * 100, '999,999,999,999,999') AS c FROM {schema_name}.{table_name} TABLESAMPLE SYSTEM (1);
+        ''')
+        row_count = pd.read_sql_query(rowcount_sql, con)
         #merge sample with column types, comments
-        final = column_types.merge(data_sample_T, on = 'column_name')
-        final = column_comments.merge(final, on = 'column_name', how='right')
+        final = column_types.merge(data_sample_T, on = 'Column Name')
         #reorder columns
         final=custom_dataset(final, ['Column Name', 'Data Type', 'Sample', 'Comments'])
         #replace nans
@@ -142,12 +161,13 @@ with engine.connect() as con:
         final_formatted = final.to_markdown(index = False, tablefmt="github")        
         #print for debugging
         #print(final_formatted)        
-        #write formatted output with table name as header        
+        #write formatted output with table name as header
+        object_type = tables.loc[tables.table_name == table_name, 'table_type'].iloc[0]
+        
         with open(fname, "a") as file: #append
-            file.write("### `{}.{}`\n".format(schema_name, table_name))
-            file.write(f"{table_comment}\n\n")
-            if(row_count_on): 
-                file.write("Row count: {:,}\n".format(row_count['count'][0]))
+            file.write(f"### `{schema_name}.{table_name}` ({object_type})\n")
+            file.write(f"{table_comment}\n")
+            file.write(f"Approx row count: {row_count['c'][0]}\n")
             file.write(final_formatted + "\n\n")
 
 print(f"File path of output: {fname}")
