@@ -132,6 +132,7 @@ def get_schema_readmes(schema_name, table_prefix):
             data_sample_T = data_sample.T
             data_sample_T["Column Name"] = data_sample_T.index
             data_sample_T.rename(columns= {0: "Sample"}, inplace=True)
+            data_sample_T['Sample'] = data_sample_T['Sample'].apply(lambda x: str(x)[:80])
             table_comments = pd.read_sql_query(table_comments_sql, con, params={'schema': schema_name, 'table': table_name})
             try:
                 table_comment = table_comments['description'][0]
